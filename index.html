@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus OLX - Student Marketplace</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+
+<body>
+    <canvas id="bg-canvas"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;"></canvas>
+    <nav class="main-nav">
+        <div class="wrapper nav-wrapper">
+            <div class="logo"><i class="ri-store-2-line"></i> Campus OLX</div>
+            <div class="nav-items" id="auth-links">
+                <a href="#" id="nav-login" class="btn-main">Login / Sign Up</a>
+            </div>
+            <div class="nav-items hidden" id="user-links">
+                <a href="#" id="nav-home"><i class="ri-home-4-line"></i> Browse</a>
+                <a href="#" id="nav-sell"><i class="ri-add-circle-line"></i> Sell</a>
+                <a href="#" id="nav-chat"><i class="ri-message-3-line"></i> Chat <span id="nav-chat-badge"
+                        class="badge hidden">0</span></a>
+                <div class="notification-wrapper" style="position: relative;">
+                    <a href="#" id="nav-notifications"><i class="ri-notification-3-line"></i> <span
+                            id="notification-badge" class="badge hidden">0</span></a>
+                    <div id="notification-dropdown" class="notification-dropdown hidden">
+                        <div class="dropdown-header">
+                            <h3>Notifications</h3>
+                            <button id="mark-all-read" class="btn-text">Mark all read</button>
+                        </div>
+                        <div id="notification-list"></div>
+                    </div>
+                </div>
+                <a href="#" id="nav-profile"><i class="ri-user-3-line"></i> Profile</a>
+                <div id="user-name-display"
+                    style="font-weight: 600; color: var(--text-main); padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 20px; border: 1px solid var(--border-color);">
+                    Student</div>
+                <a href="#" id="nav-logout" class="btn-main">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Auth View -->
+        <div id="view-login" class="view">
+            <div class="auth-container">
+                <!-- Login Container -->
+                <div class="auth-box" id="login-container">
+                    <h2>Login</h2>
+                    <form id="login-form">
+                        <div class="input-group">
+                            <label>University Email</label>
+                            <input type="email" name="email" required placeholder="student@university.edu">
+                        </div>
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn-main wide">Login</button>
+                        <div class="auth-divider"><span>OR</span></div>
+                        <button type="button" id="google-login-btn" class="btn-alt wide google-btn">
+                            <i class="ri-google-fill"></i> Login with Google
+                        </button>
+                    </form>
+                    <p style="margin-top: 1rem; text-align: center;">Don't have an account? <a href="#" id="show-signup"
+                            style="color: var(--primary-color); font-weight: 600;">Sign Up</a></p>
+                    <p style="margin-top: 0.5rem; text-align: center;"><a href="#" id="show-forgot-password"
+                            style="color: var(--text-secondary);">Forgot Password?</a></p>
+                </div>
+
+                <!-- Signup Container -->
+                <div class="auth-box hidden" id="signup-container">
+                    <h2>Create Account</h2>
+                    <form id="signup-form">
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" name="name" required>
+                        </div>
+                        <div class="input-group">
+                            <label>University Email</label>
+                            <input type="email" name="email" required placeholder="student@university.edu">
+                            <small style="color: var(--text-secondary);">Must be a valid .edu, .ac.in, or Gmail
+                                address</small>
+                        </div>
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn-main wide">Sign Up</button>
+                        <div class="auth-divider"><span>OR</span></div>
+                        <button type="button" id="google-signup-btn" class="btn-alt wide google-btn">
+                            <i class="ri-google-fill"></i> Sign up with Google
+                        </button>
+                    </form>
+                    <p style="margin-top: 1rem; text-align: center;">Already have an account? <a href="#"
+                            id="show-login" style="color: var(--primary-color); font-weight: 600;">Login</a></p>
+                </div>
+
+                <!-- Forgot Password Container -->
+                <div class="auth-box hidden" id="forgot-password-container">
+                    <h2>Reset Password</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center;">Enter your email
+                        address and we'll send you a link to reset your password.</p>
+                    <form id="forgot-password-form">
+                        <div class="input-group">
+                            <label>University Email</label>
+                            <input type="email" name="email" required placeholder="student@university.edu">
+                        </div>
+                        <button type="submit" class="btn-main wide">Send Reset Link</button>
+                    </form>
+                    <p style="margin-top: 1rem; text-align: center;"><a href="#" id="back-to-login"
+                            style="color: var(--primary-color); font-weight: 600;">Back to Login</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home View (Listings) -->
+        <div id="view-home" class="view hidden">
+            <div class="hero">
+                <h1>Buy & Sell on Campus</h1>
+                <p>The trusted marketplace for students. Find books, electronics, and more from peers at your
+                    university.</p>
+            </div>
+
+
+            <!-- Mobile Category Scroll -->
+            <div class="category-scroll-container mobile-only">
+                <div class="category-item active" data-category="">
+                    <div class="cat-icon"><i class="ri-apps-line"></i></div>
+                    <span>All</span>
+                </div>
+                <div class="category-item" data-category="Books">
+                    <div class="cat-icon"><i class="ri-book-open-line"></i></div>
+                    <span>Books</span>
+                </div>
+                <div class="category-item" data-category="Electronics">
+                    <div class="cat-icon"><i class="ri-computer-line"></i></div>
+                    <span>Electronics</span>
+                </div>
+                <div class="category-item" data-category="Furniture">
+                    <div class="cat-icon"><i class="ri-sofa-line"></i></div>
+                    <span>Furniture</span>
+                </div>
+                <div class="category-item" data-category="Clothing">
+                    <div class="cat-icon"><i class="ri-t-shirt-line"></i></div>
+                    <span>Clothing</span>
+                </div>
+                <div class="category-item" data-category="Other">
+                    <div class="cat-icon"><i class="ri-more-fill"></i></div>
+                    <span>Other</span>
+                </div>
+            </div>
+
+            <div class="filters-wrapper">
+                <i class="ri-search-line" style="color: var(--text-secondary); font-size: 1.2rem;"></i>
+                <input type="text" id="search-filter" placeholder="Search for textbooks, furniture..."
+                    class="search-bar">
+                <select id="category-filter" class="filter-select">
+                    <option value="">All Categories</option>
+                    <option value="Books">Books</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div id="listings-container" class="listings-grid">
+                <!-- Listings will be injected here -->
+            </div>
+        </div>
+
+        <!-- Create Listing View -->
+        <div id="view-create" class="view hidden">
+            <div class="create-form-box">
+                <h2><i class="ri-price-tag-3-line"></i> Sell an Item</h2>
+                <form id="create-listing-form">
+                    <div class="input-group">
+                        <label>Title</label>
+                        <input type="text" name="title" required placeholder="e.g. Calculus Textbook, 3rd Ed">
+                    </div>
+                    <div class="input-group">
+                        <label>Price (₹)</label>
+                        <input type="number" name="price" step="0.01" required placeholder="0.00">
+                    </div>
+                    <div class="input-group">
+                        <label>Category</label>
+                        <select name="category" required>
+                            <option value="Books">Books</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Condition</label>
+                        <select name="condition" required>
+                            <option value="New">New</option>
+                            <option value="Like New">Like New</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Description</label>
+                        <textarea name="description" rows="4" required
+                            placeholder="Describe the item's condition and details..."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>Image</label>
+                        <input type="file" name="image" accept="image/*">
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="button" onclick="showView('view-home')" class="btn-alt wide">Cancel</button>
+                        <button type="submit" class="btn-main wide">Post Listing</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Listing Details View -->
+        <div id="view-details" class="view hidden">
+            <div class="wrapper">
+                <button onclick="showView('view-home')" class="btn-back"><i class="ri-arrow-left-line"></i> Back to
+                    Browse</button>
+                <div id="listing-details-content" class="details-box">
+                    <!-- Details injected here -->
+                </div>
+                <!-- Comments Section -->
+                <div class="comments-section" id="comments-section">
+                    <h3>Discussion</h3>
+                    <div id="comments-list"></div>
+                    <form id="comment-form" class="comment-form">
+                        <input type="text" id="comment-input" placeholder="Ask a question..." required>
+                        <button type="submit" class="btn-main">Post</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat View -->
+        <div id="view-chat" class="view hidden">
+            <div class="chat-container">
+                <div class="chat-sidebar">
+                    <h3>Messages</h3>
+                    <div id="chat-list" class="chat-list">
+                        <!-- Chat items injected here -->
+                    </div>
+                </div>
+                <div class="chat-window">
+                    <div id="chat-header" class="chat-header hidden">
+                        <button id="btn-back-chat" class="btn-back-chat"><i class="ri-arrow-left-line"></i></button>
+                        <div class="chat-user-info">
+                            <h4 id="chat-partner-name">User Name</h4>
+                            <span id="chat-item-title">Item Title</span>
+                        </div>
+                    </div>
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="empty-chat-state">
+                            <i class="ri-message-2-line"></i>
+                            <p>Select a conversation to start chatting</p>
+                        </div>
+                    </div>
+                    <form id="chat-form" class="chat-input-area hidden">
+                        <input type="text" id="message-input" placeholder="Type a message..." required>
+                        <button type="submit" class="btn-main"><i class="ri-send-plane-fill"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile View -->
+        <div id="view-profile" class="view hidden">
+            <div class="wrapper">
+                <div class="profile-header">
+                    <div class="profile-info">
+                        <div class="profile-avatar">
+                            <i class="ri-user-line"></i>
+                        </div>
+                        <div class="profile-text">
+                            <h2 id="profile-name">Student Name</h2>
+                            <p id="profile-email"><i class="ri-mail-line"></i> student@university.edu</p>
+                            <p id="profile-university"><i class="ri-building-2-line"></i> University</p>
+                        </div>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="stat-card">
+                            <h3 id="stat-active">0</h3>
+                            <p>Active</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="stat-sold">0</h3>
+                            <p>Sold</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="stat-views">0</h3>
+                            <p>Total Views</p>
+                        </div>
+                    </div>
+                    <button id="profile-logout-btn" class="btn-alt mobile-only"
+                        style="border-color: var(--danger-color); color: var(--danger-color);">
+                        <i class="ri-logout-box-r-line"></i> Logout
+                    </button>
+                </div>
+
+                <h3 style="margin: 2rem 0 1rem;">My Listings</h3>
+                <div id="profile-listings-container" class="listings-grid">
+                    <!-- Listings injected here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+
+    <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/background.js"></script>
+    <!-- Expose showView globally for inline onclicks -->
+    <script type="module">
+        import { showView } from './js/ui.js';
+        window.showView = showView;
+    </script>
+</body>
+
+</html>
