@@ -248,7 +248,11 @@ export function renderProfile(user, listings, isOwnProfile = true) {
     // Hide/Show Logout Button
     const logoutBtn = document.getElementById('profile-logout-btn');
     if (logoutBtn) {
-        logoutBtn.style.display = isOwnProfile ? 'block' : 'none';
+        if (isOwnProfile) {
+            logoutBtn.style.removeProperty('display');
+        } else {
+            logoutBtn.style.setProperty('display', 'none', 'important');
+        }
     }
 
     // Update Listings Heading
@@ -359,10 +363,15 @@ export function renderChatList(chats, currentUserId, activeChatId = null) {
         const initial = partnerName.charAt(0).toUpperCase();
         div.dataset.partnerName = partnerName;
 
+        let avatarHtml;
+        if (chat.partnerPhotoURL) {
+            avatarHtml = `<img src="${chat.partnerPhotoURL}" class="chat-avatar-placeholder" style="object-fit: cover;">`;
+        } else {
+            avatarHtml = `<div class="chat-avatar-placeholder">${initial}</div>`;
+        }
+
         div.innerHTML = `
-            <div class="chat-avatar-placeholder">
-                ${initial}
-            </div>
+            ${avatarHtml}
             <div style="flex-grow: 1;">
                 <h4>${partnerName}</h4>
                 <p>${chat.lastMessage || 'No messages'}</p>
@@ -375,7 +384,7 @@ export function renderChatList(chats, currentUserId, activeChatId = null) {
     });
 }
 
-export function renderChatMessages(messages, currentUserId) {
+export function renderChatMessages(messages, currentUserId, partnerPhotoURL = null, currentUserPhotoURL = null) {
     const container = document.getElementById('chat-messages');
     container.innerHTML = '';
 
@@ -385,10 +394,30 @@ export function renderChatMessages(messages, currentUserId) {
     }
 
     messages.forEach(msg => {
-        const div = document.createElement('div');
-        div.className = `message ${msg.senderId === currentUserId ? 'sent' : 'received'}`;
-        div.textContent = msg.text;
-        container.appendChild(div);
+        const isSent = msg.senderId === currentUserId;
+        const row = document.createElement('div');
+        row.className = `message-row ${isSent ? 'sent' : 'received'}`;
+
+        const photoURL = isSent ? currentUserPhotoURL : partnerPhotoURL;
+
+        if (photoURL) {
+            const img = document.createElement('img');
+            img.src = photoURL;
+            img.className = 'chat-avatar';
+            row.appendChild(img);
+        } else {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'chat-avatar placeholder';
+            placeholder.innerHTML = '<i class="ri-user-line"></i>';
+            row.appendChild(placeholder);
+        }
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+        msgDiv.textContent = msg.text;
+
+        row.appendChild(msgDiv);
+        container.appendChild(row);
     });
 
     // Scroll to bottom

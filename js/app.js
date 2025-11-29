@@ -558,7 +558,7 @@ async function loadUserProfile(userId) {
         let user = currentUser;
         let isOwnProfile = true;
 
-        if (userId && userId !== currentUser.uid) {
+        if (userId && (!currentUser || userId !== currentUser.uid)) {
             isOwnProfile = false;
             user = await getUserById(userId);
             if (!user) {
@@ -788,11 +788,15 @@ async function loadChat() {
         const chatsWithNames = await Promise.all(chats.map(async (chat) => {
             const partnerId = chat.participants.find(p => p !== currentUser.uid);
             let partnerName = "User";
+            let partnerPhotoURL = null;
             if (partnerId) {
                 const partner = await getUserById(partnerId);
-                if (partner) partnerName = partner.displayName;
+                if (partner) {
+                    partnerName = partner.displayName;
+                    partnerPhotoURL = partner.photoURL;
+                }
             }
-            return { ...chat, partnerName, partnerId };
+            return { ...chat, partnerName, partnerPhotoURL, partnerId };
         }));
 
         renderChatList(chatsWithNames, currentUser.uid);
@@ -825,23 +829,23 @@ async function loadChatMessages(chatId, partnerIdOrName) {
         const chat = await getChatById(chatId);
         if (chat && chat.listingId) {
             const listing = await getListingById(chat.listingId);
-            // Set Product Title as Main Heading (h4)
-            nameEl.textContent = listing ? listing.title : "Item Unavailable";
+            // Set Product Title as Subtitle
+            titleEl.textContent = listing ? listing.title : "Item Unavailable";
         } else {
-            nameEl.textContent = "Item Inquiry";
+            titleEl.textContent = "Item Inquiry";
         }
     } catch (err) {
         console.error("Error fetching chat details:", err);
-        nameEl.textContent = "Chat";
+        titleEl.textContent = "Chat";
     }
 
     if (typeof partnerIdOrName === 'string') {
         // It's a name passed from UI
-        titleEl.textContent = partnerIdOrName;
+        nameEl.textContent = partnerIdOrName;
     } else {
         // It's an ID (from contact seller), fetch name
         const user = await getUserById(partnerIdOrName);
-        titleEl.textContent = user ? user.displayName : "User";
+        nameEl.textContent = user ? user.displayName : "User";
     }
 
     // Unsubscribe previous listener if any
@@ -850,9 +854,30 @@ async function loadChatMessages(chatId, partnerIdOrName) {
         messageUnsubscribe = null;
     }
 
+    // Fetch partner photo URL
+    let partnerPhotoURL = null;
+    try {
+        if (typeof partnerIdOrName !== 'string') {
+            const user = await getUserById(partnerIdOrName);
+            if (user) partnerPhotoURL = user.photoURL;
+        } else {
+            // Try to find partnerId from chat participants if we have chatId
+            const chat = await getChatById(chatId);
+            if (chat) {
+                const partnerId = chat.participants.find(p => p !== currentUser.uid);
+                if (partnerId) {
+                    const user = await getUserById(partnerId);
+                    if (user) partnerPhotoURL = user.photoURL;
+                }
+            }
+        }
+    } catch (e) {
+        console.error("Error fetching partner photo:", e);
+    }
+
     // Subscribe to real-time messages
     messageUnsubscribe = subscribeToChatMessages(chatId, (messages) => {
-        renderChatMessages(messages, currentUser.uid);
+        renderChatMessages(messages, currentUser.uid, partnerPhotoURL, currentUser.photoURL);
     });
 
     // Highlight active chat in list (if list is loaded)

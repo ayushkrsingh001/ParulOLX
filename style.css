@@ -353,14 +353,8 @@ select {
     grid-template-columns: repeat(4, 1fr);
     gap: 2rem;
     padding-bottom: 4rem;
-}
-
-.listings-grid .item-card:first-child {
-    margin-left: 15px;
-}
-
-.listings-grid .item-card:nth-child(4n) {
-    margin-right: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .item-card {
@@ -1537,15 +1531,49 @@ select {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.message.sent {
+.message-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+    max-width: 80%;
+}
+
+.message-row.received {
+    align-self: flex-start;
+}
+
+.chat-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.chat-avatar.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.message-row.sent {
     align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.message.sent {
+    /* align-self handled by row */
     background: var(--primary-gradient);
     color: white;
     border-radius: 20px 20px 4px 20px;
 }
 
 .message.received {
-    align-self: flex-start;
+    /* align-self handled by row */
     background: rgba(255, 255, 255, 0.08);
     color: var(--text-main);
     border-radius: 20px 20px 20px 4px;
@@ -2520,6 +2548,8 @@ select {
             grid-template-columns: 1fr !important;
             /* Force 1 column */
             gap: 1.5rem;
+            padding-left: 16px;
+            padding-right: 16px;
         }
 
         .card-image {
