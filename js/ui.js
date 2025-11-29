@@ -74,8 +74,11 @@ export function renderListingDetails(listing, currentUser, containerId = 'listin
 
     let imagesHtml = '';
     if (listing.images && listing.images.length > 0) {
-        imagesHtml = `<div class="details-gallery">
+        imagesHtml = `<div class="details-gallery" style="position: relative;">
             ${listing.images.map(img => `<img src="${img}" alt="${listing.title}">`).join('')}
+            <button class="click-to-view-btn" id="btn-full-photo-details">
+                <i class="ri-fullscreen-line"></i> Click to view
+            </button>
         </div>`;
     } else {
         imagesHtml = `<div class="details-gallery">
@@ -161,6 +164,29 @@ export function renderListingDetails(listing, currentUser, containerId = 'listin
             </div>
         </div>
     `;
+
+    // Full Photo Logic
+    const btnFullPhoto = document.getElementById('btn-full-photo-details');
+    if (btnFullPhoto && listing.images && listing.images.length > 0) {
+        btnFullPhoto.onclick = () => {
+            const fullModal = document.getElementById('full-photo-modal');
+            const fullImg = document.getElementById('full-photo-img');
+            fullImg.src = listing.images[0];
+            fullModal.classList.remove('hidden');
+
+            // Close Full Photo
+            const closeFull = document.getElementById('close-full-photo');
+            closeFull.onclick = () => {
+                fullModal.classList.add('hidden');
+            };
+
+            fullModal.onclick = (e) => {
+                if (e.target === fullModal) {
+                    fullModal.classList.add('hidden');
+                }
+            };
+        };
+    }
 }
 
 export function updateAuthUI(user) {
