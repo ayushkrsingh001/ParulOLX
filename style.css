@@ -1123,22 +1123,22 @@ select {
     text-decoration: underline;
 }
 
-.notification-list {
-    max-height: 400px;
+#notification-list {
+    max-height: 300px;
     overflow-y: auto;
     padding: 0.5rem;
 }
 
 /* Custom Scrollbar for Notifications */
-.notification-list::-webkit-scrollbar {
+#notification-list::-webkit-scrollbar {
     width: 6px;
 }
 
-.notification-list::-webkit-scrollbar-track {
+#notification-list::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.notification-list::-webkit-scrollbar-thumb {
+#notification-list::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 3px;
 }
