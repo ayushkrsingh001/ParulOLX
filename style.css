@@ -381,10 +381,32 @@ select {
 
 .card-image {
     height: 180px;
-    background-size: cover;
-    background-position: center;
     background-color: #1e293b;
     position: relative;
+    overflow: hidden;
+}
+
+.card-image-scroll {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    height: 100%;
+    width: 100%;
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.card-image-scroll::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+.card-image-scroll img {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    scroll-snap-align: center;
 }
 
 .card-content {
@@ -458,19 +480,24 @@ select {
 }
 
 .details-gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    display: flex;
+    overflow-x: auto;
     gap: 1.5rem;
     margin-bottom: 3rem;
+    padding-bottom: 1rem;
+    /* Space for scrollbar */
+    scroll-snap-type: x mandatory;
 }
 
 .details-gallery img {
-    width: 100%;
+    flex: 0 0 300px;
+    /* Fixed width for details images */
     height: 350px;
     object-fit: cover;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
     transition: transform 0.3s;
+    scroll-snap-align: start;
 }
 
 .details-gallery img:hover {
@@ -2928,7 +2955,7 @@ select {
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
+    overflow: hidden;
     background-color: rgba(0, 0, 0, 0.95);
     display: flex;
     align-items: center;
@@ -2941,15 +2968,28 @@ select {
     display: none !important;
 }
 
+.full-photo-slider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
 .full-photo-content {
-    margin: auto;
-    display: block;
-    max-width: 95%;
-    max-height: 95vh;
+    max-width: 90%;
+    max-height: 90vh;
     object-fit: contain;
     border-radius: 4px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     animation: zoomIn 0.3s;
+    display: none;
+    /* Hidden by default, active one shown via JS */
+}
+
+.full-photo-content.active {
+    display: block;
 }
 
 .close-full-photo {
@@ -2961,7 +3001,7 @@ select {
     font-weight: bold;
     transition: 0.3s;
     cursor: pointer;
-    z-index: 4001;
+    z-index: 4002;
 }
 
 .close-full-photo:hover,
@@ -2971,12 +3011,44 @@ select {
     cursor: pointer;
 }
 
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    font-size: 2rem;
+    padding: 1rem;
+    cursor: pointer;
+    z-index: 4001;
+    border-radius: 50%;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.prev-btn {
+    left: 20px;
+}
+
+.next-btn {
+    right: 20px;
+}
+
 @keyframes zoomIn {
     from {
-        transform: scale(0)
+        transform: scale(0.9);
+        opacity: 0;
     }
 
     to {
-        transform: scale(1)
+        transform: scale(1);
+        opacity: 1;
     }
 }

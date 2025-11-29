@@ -33,8 +33,13 @@ export function renderListings(listings, containerId = 'listings-container') {
 
         let imageContent;
         if (listing.images && listing.images.length > 0) {
-            imageContent = `<div class="card-image" style="background-image: url('${listing.images[0]}')">
+            const imagesHtml = listing.images.map(img => `<img src="${img}" alt="${listing.title}" loading="lazy">`).join('');
+            imageContent = `<div class="card-image">
+                                <div class="card-image-scroll">
+                                    ${imagesHtml}
+                                </div>
                                 ${listing.status === 'sold' ? '<div class="sold-badge">SOLD</div>' : ''}
+                                ${listing.images.length > 1 ? '<div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem;">+' + (listing.images.length - 1) + '</div>' : ''}
                             </div>`;
         } else {
             imageContent = `<div class="card-image">
@@ -74,8 +79,10 @@ export function renderListingDetails(listing, currentUser, containerId = 'listin
 
     let imagesHtml = '';
     if (listing.images && listing.images.length > 0) {
-        imagesHtml = `<div class="details-gallery" style="position: relative;">
-            ${listing.images.map(img => `<img src="${img}" alt="${listing.title}">`).join('')}
+        imagesHtml = `<div class="details-gallery-wrapper" style="position: relative;">
+            <div class="details-gallery">
+                ${listing.images.map(img => `<img src="${img}" alt="${listing.title}">`).join('')}
+            </div>
             <button class="click-to-view-btn" id="btn-full-photo-details">
                 <i class="ri-fullscreen-line"></i> Click to view
             </button>
@@ -170,19 +177,74 @@ export function renderListingDetails(listing, currentUser, containerId = 'listin
     if (btnFullPhoto && listing.images && listing.images.length > 0) {
         btnFullPhoto.onclick = () => {
             const fullModal = document.getElementById('full-photo-modal');
-            const fullImg = document.getElementById('full-photo-img');
-            fullImg.src = listing.images[0];
+            const sliderContainer = document.getElementById('full-photo-slider');
+            const prevBtn = document.getElementById('full-photo-prev');
+            const nextBtn = document.getElementById('full-photo-next');
+
+            let currentIndex = 0;
+            const images = listing.images;
+
+            // Populate slider
+            sliderContainer.innerHTML = images.map((img, index) =>
+                `<img src="${img}" class="full-photo-content ${index === 0 ? 'active' : ''}" data-index="${index}">`
+            ).join('');
+
+            const updateSlider = () => {
+                const slides = sliderContainer.querySelectorAll('.full-photo-content');
+                slides.forEach((slide, index) => {
+                    if (index === currentIndex) {
+                        slide.classList.add('active');
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+
+                // Hide arrows if only 1 image
+                if (images.length <= 1) {
+                    prevBtn.style.display = 'none';
+                    nextBtn.style.display = 'none';
+                } else {
+                    prevBtn.style.display = 'flex';
+                    nextBtn.style.display = 'flex';
+                }
+            };
+
+            prevBtn.onclick = (e) => {
+                e.stopPropagation();
+                currentIndex = (currentIndex - 1 + images.length) % images.length;
+                updateSlider();
+            };
+
+            nextBtn.onclick = (e) => {
+                e.stopPropagation();
+                currentIndex = (currentIndex + 1) % images.length;
+                updateSlider();
+            };
+
             fullModal.classList.remove('hidden');
+            updateSlider();
 
             // Close Full Photo
             const closeFull = document.getElementById('close-full-photo');
-            closeFull.onclick = () => {
+            const closeFullModal = () => {
                 fullModal.classList.add('hidden');
+                document.onkeydown = null; // Remove keyboard listener when modal is closed
             };
 
+            closeFull.onclick = closeFullModal;
+
             fullModal.onclick = (e) => {
-                if (e.target === fullModal) {
-                    fullModal.classList.add('hidden');
+                if (e.target === fullModal || e.target === sliderContainer) {
+                    closeFullModal();
+                }
+            };
+
+            // Keyboard navigation
+            document.onkeydown = (e) => {
+                if (!fullModal.classList.contains('hidden')) {
+                    if (e.key === 'ArrowLeft') prevBtn.click();
+                    if (e.key === 'ArrowRight') nextBtn.click();
+                    if (e.key === 'Escape') closeFullModal();
                 }
             };
         };
@@ -302,8 +364,13 @@ export function renderProfile(user, listings, isOwnProfile = true) {
 
         let imageContent;
         if (listing.images && listing.images.length > 0) {
-            imageContent = `<div class="card-image" style="background-image: url('${listing.images[0]}')">
+            const imagesHtml = listing.images.map(img => `<img src="${img}" alt="${listing.title}" loading="lazy">`).join('');
+            imageContent = `<div class="card-image">
+                                <div class="card-image-scroll">
+                                    ${imagesHtml}
+                                </div>
                                 ${listing.status === 'sold' ? '<div class="sold-badge">SOLD</div>' : ''}
+                                ${listing.images.length > 1 ? '<div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem;">+' + (listing.images.length - 1) + '</div>' : ''}
                             </div>`;
         } else {
             imageContent = `<div class="card-image">

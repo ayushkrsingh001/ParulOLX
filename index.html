@@ -218,7 +218,7 @@
                     </div>
                     <div class="input-group">
                         <label>Image</label>
-                        <input type="file" name="image" accept="image/*">
+                        <input type="file" name="image" accept="image/*" multiple>
                     </div>
                     <div style="display: flex; gap: 1rem;">
                         <button type="button" onclick="showView('view-home')" class="btn-alt wide">Cancel</button>
@@ -374,7 +374,11 @@
         <!-- Full Photo Modal -->
         <div id="full-photo-modal" class="full-photo-modal hidden">
             <span id="close-full-photo" class="close-full-photo">&times;</span>
-            <img class="full-photo-content" id="full-photo-img">
+            <button id="full-photo-prev" class="nav-btn prev-btn"><i class="ri-arrow-left-s-line"></i></button>
+            <div class="full-photo-slider" id="full-photo-slider">
+                <!-- Images injected here -->
+            </div>
+            <button id="full-photo-next" class="nav-btn next-btn"><i class="ri-arrow-right-s-line"></i></button>
         </div>
     </main>
 

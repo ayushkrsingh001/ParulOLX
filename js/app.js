@@ -657,9 +657,11 @@ async function handleCreateListing(e) {
 
     try {
         if (fileInput.files.length > 0) {
-            // Upload first image for now (can expand to multiple)
-            const url = await uploadImage(fileInput.files[0]);
-            imageUrls.push(url);
+            // Upload all images
+            for (let i = 0; i < fileInput.files.length; i++) {
+                const url = await uploadImage(fileInput.files[i]);
+                imageUrls.push(url);
+            }
         }
 
         const listingData = {
