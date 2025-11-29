@@ -79,22 +79,49 @@ export function renderListingDetails(listing, currentUser, containerId = 'listin
 
     let imagesHtml = '';
     if (listing.images && listing.images.length > 0) {
-        imagesHtml = `<div class="details-gallery-wrapper" style="position: relative;">
-            <div class="details-gallery">
-                ${listing.images.map(img => `<img src="${img}" alt="${listing.title}">`).join('')}
+        imagesHtml = `
+        <div class="gallery-container">
+            <div class="main-image-frame">
+                <img src="${listing.images[0]}" id="details-main-image" alt="${listing.title}">
+                <button class="click-to-view-btn" id="btn-full-photo-details">
+                    <i class="ri-fullscreen-line"></i> Click to view
+                </button>
             </div>
-            <button class="click-to-view-btn" id="btn-full-photo-details">
-                <i class="ri-fullscreen-line"></i> Click to view
-            </button>
+            <div class="thumbnails-track">
+                ${listing.images.map((img, index) => `
+                    <button class="thumbnail-btn ${index === 0 ? 'active' : ''}" onclick="changeMainImage('${img}', this)">
+                        <img src="${img}" alt="Thumbnail ${index + 1}">
+                    </button>
+                `).join('')}
+            </div>
         </div>`;
     } else {
-        imagesHtml = `<div class="details-gallery">
-            <div class="no-image-placeholder large">
-                <i class="ri-image-line"></i>
-                <span>No Images</span>
+        imagesHtml = `
+        <div class="gallery-container">
+            <div class="main-image-frame" style="display: flex; align-items: center; justify-content: center; background: var(--bg-card);">
+                <div class="no-image-placeholder large">
+                    <i class="ri-image-line"></i>
+                    <span>No Images</span>
+                </div>
             </div>
         </div>`;
     }
+
+    // Helper function for switching images (needs to be global or attached to window)
+    window.changeMainImage = (src, btn) => {
+        const mainImg = document.getElementById('details-main-image');
+        if (mainImg) {
+            mainImg.style.opacity = '0';
+            setTimeout(() => {
+                mainImg.src = src;
+                mainImg.style.opacity = '1';
+            }, 200);
+        }
+
+        // Update active state
+        document.querySelectorAll('.thumbnail-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    };
 
     container.innerHTML = `
         ${imagesHtml}
@@ -181,12 +208,19 @@ export function renderListingDetails(listing, currentUser, containerId = 'listin
             const prevBtn = document.getElementById('full-photo-prev');
             const nextBtn = document.getElementById('full-photo-next');
 
-            let currentIndex = 0;
+
             const images = listing.images;
+
+            // Detect current image index
+            const currentMainSrc = document.getElementById('details-main-image').src;
+            let foundIndex = images.findIndex(img => currentMainSrc.includes(img) || img.includes(currentMainSrc));
+            if (foundIndex === -1) foundIndex = 0;
+
+            let currentIndex = foundIndex;
 
             // Populate slider
             sliderContainer.innerHTML = images.map((img, index) =>
-                `<img src="${img}" class="full-photo-content ${index === 0 ? 'active' : ''}" data-index="${index}">`
+                `<img src="${img}" class="full-photo-content ${index === currentIndex ? 'active' : ''}" data-index="${index}">`
             ).join('');
 
             const updateSlider = () => {
