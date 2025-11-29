@@ -51,6 +51,18 @@ export async function getListings(filters = {}) {
             listings.push({ id: doc.id, ...doc.data() });
         });
 
+        // Filter by search term
+        if (filters.search) {
+            const term = filters.search.toLowerCase();
+            const filteredListings = listings.filter(l =>
+                (l.title && l.title.toLowerCase().includes(term)) ||
+                (l.description && l.description.toLowerCase().includes(term))
+            );
+            // Sort by date desc
+            filteredListings.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+            return filteredListings;
+        }
+
         // Client-side sort if we removed the orderBy from query (or just always to be safe)
         if (filters.category) {
             listings.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
@@ -185,6 +197,30 @@ export async function markAllNotificationsRead(userId) {
     }
 }
 
+export async function deleteNotification(userId, notificationId) {
+    try {
+        await deleteDoc(doc(db, "users", userId, "notifications", notificationId));
+    } catch (error) {
+        console.error("Error deleting notification:", error);
+        throw error;
+    }
+}
+
+export async function deleteAllNotifications(userId) {
+    try {
+        const q = query(collection(db, "users", userId, "notifications"));
+        const snapshot = await getDocs(q);
+        const promises = [];
+        snapshot.forEach((doc) => {
+            promises.push(deleteDoc(doc.ref));
+        });
+        await Promise.all(promises);
+    } catch (error) {
+        console.error("Error deleting all notifications:", error);
+        throw error;
+    }
+}
+
 // --- Chat ---
 
 export async function startChat(listingId, sellerId, currentUserId) {
@@ -221,6 +257,16 @@ export async function startChat(listingId, sellerId, currentUserId) {
         return { id: docRef.id, isNew: true };
     } catch (error) {
         console.error("Error starting chat:", error);
+        throw error;
+    }
+}
+
+export async function updateUserProfile(userId, data) {
+    try {
+        const userRef = doc(db, "users", userId);
+        await updateDoc(userRef, data);
+    } catch (error) {
+        console.error("Error updating profile:", error);
         throw error;
     }
 }
@@ -292,6 +338,21 @@ export async function getUserChats(userId) {
         return chats;
     } catch (error) {
         console.error("Error getting chats:", error);
+        throw error;
+    }
+}
+
+export async function getChatById(chatId) {
+    try {
+        const docRef = doc(db, "chats", chatId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() };
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error("Error getting chat:", error);
         throw error;
     }
 }

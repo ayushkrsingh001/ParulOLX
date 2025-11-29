@@ -107,7 +107,9 @@ export function renderListingDetails(listing, currentUser, containerId = 'listin
             
             <div class="seller-box">
                 <h3>Seller Information</h3>
-                <p><i class="ri-user-smile-line"></i> ${listing.sellerName}</p>
+                <p class="seller-link" data-seller-id="${listing.sellerId}" style="cursor: pointer; color: var(--primary-color); font-weight: 600; transition: color 0.2s;">
+                    <i class="ri-user-smile-line"></i> ${listing.sellerName}
+                </p>
                 <p><i class="ri-building-2-line"></i> ${listing.university || 'University Student'}</p>
                 ${isOwner ?
             `<button id="btn-delete-listing" class="btn-alt wide" style="border-color: var(--danger-color); color: var(--danger-color); margin-top: 1rem;" data-id="${listing.id}">
@@ -175,11 +177,25 @@ export function updateAuthUI(user) {
     }
 }
 
-export function renderProfile(user, listings) {
+export function renderProfile(user, listings, isOwnProfile = true) {
     // Update Header
+    const avatarContainer = document.querySelector('.profile-avatar');
+    if (user.photoURL) {
+        avatarContainer.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+    } else {
+        avatarContainer.innerHTML = `<i class="ri-user-line"></i>`;
+    }
+
     document.getElementById('profile-name').textContent = user.displayName || 'Student';
     document.getElementById('profile-email').innerHTML = `<i class="ri-mail-line"></i> ${user.email}`;
-    document.getElementById('profile-university').innerHTML = `<i class="ri-building-2-line"></i> ${user.university || 'University Student'}`;
+
+    let details = [];
+    if (user.course) details.push(user.course);
+    if (user.year) details.push(user.year);
+    if (user.division) details.push(`Div: ${user.division}`);
+
+    const detailsText = details.length > 0 ? details.join(' | ') : 'University Student';
+    document.getElementById('profile-university').innerHTML = `<i class="ri-building-2-line"></i> ${detailsText}`;
 
     // Calculate Stats
     const activeCount = listings.filter(l => l.status === 'active').length;
@@ -188,10 +204,58 @@ export function renderProfile(user, listings) {
     document.getElementById('stat-active').textContent = activeCount;
     document.getElementById('stat-sold').textContent = soldCount;
 
-    // Calculate Total Views
-    const totalViews = listings.reduce((acc, curr) => acc + (curr.views || 0), 0);
+    // Calculate Total Views (Only show for own profile)
     const viewsEl = document.getElementById('stat-views');
-    if (viewsEl) viewsEl.textContent = totalViews;
+    const viewsCard = viewsEl ? viewsEl.closest('.stat-card') : null;
+
+    if (isOwnProfile) {
+        const totalViews = listings.reduce((acc, curr) => acc + (curr.views || 0), 0);
+        if (viewsEl) viewsEl.textContent = totalViews;
+        if (viewsCard) viewsCard.style.display = 'block';
+
+        // Show Edit Profile Button
+        const editBtn = document.getElementById('btn-edit-profile');
+        if (editBtn) {
+            editBtn.classList.remove('hidden');
+            editBtn.style.display = 'inline-flex'; // Force display
+        }
+    } else {
+        if (viewsCard) viewsCard.style.display = 'none';
+
+        // Hide Edit Profile Button
+        const editBtn = document.getElementById('btn-edit-profile');
+        if (editBtn) {
+            editBtn.classList.add('hidden');
+            editBtn.style.display = 'none';
+        }
+    }
+
+    // Display Phone Number if available
+    const phoneDisplay = document.getElementById('profile-phone');
+    if (user.phoneNumber) {
+        if (!phoneDisplay) {
+            const phoneP = document.createElement('p');
+            phoneP.id = 'profile-phone';
+            phoneP.innerHTML = `<i class="ri-phone-line"></i> ${user.phoneNumber}`;
+            document.querySelector('.profile-text').appendChild(phoneP);
+        } else {
+            phoneDisplay.innerHTML = `<i class="ri-phone-line"></i> ${user.phoneNumber}`;
+        }
+    } else if (phoneDisplay) {
+        phoneDisplay.remove();
+    }
+
+    // Hide/Show Logout Button
+    const logoutBtn = document.getElementById('profile-logout-btn');
+    if (logoutBtn) {
+        logoutBtn.style.display = isOwnProfile ? 'block' : 'none';
+    }
+
+    // Update Listings Heading
+    const listingsHeading = document.getElementById('profile-listings-heading');
+    if (listingsHeading) {
+        listingsHeading.textContent = isOwnProfile ? 'My Listings' : `${user.displayName || 'User'}'s Listings`;
+    }
 
     // Render Listings
     const container = document.getElementById('profile-listings-container');
@@ -292,9 +356,13 @@ export function renderChatList(chats, currentUserId, activeChatId = null) {
         const partnerId = chat.participants.find(p => p !== currentUserId);
         // Use partnerName if available (fetched in app.js), else fallback
         const partnerName = chat.partnerName || "User";
+        const initial = partnerName.charAt(0).toUpperCase();
         div.dataset.partnerName = partnerName;
 
         div.innerHTML = `
+            <div class="chat-avatar-placeholder">
+                ${initial}
+            </div>
             <div style="flex-grow: 1;">
                 <h4>${partnerName}</h4>
                 <p>${chat.lastMessage || 'No messages'}</p>
@@ -332,6 +400,16 @@ export function renderNotifications(notifications) {
     const badge = document.getElementById('notification-badge');
     container.innerHTML = '';
 
+    // Toggle Delete All Button
+    const deleteAllBtn = document.getElementById('delete-all-notifs');
+    if (deleteAllBtn) {
+        if (notifications.length > 5) {
+            deleteAllBtn.style.display = 'block';
+        } else {
+            deleteAllBtn.style.display = 'none';
+        }
+    }
+
     const unreadCount = notifications.filter(n => !n.read).length;
     if (unreadCount > 0) {
         badge.textContent = unreadCount;
@@ -356,16 +434,63 @@ export function renderNotifications(notifications) {
         return;
     }
 
-    notifications.forEach(notif => {
+    const initialDisplayCount = 5;
+    const notificationsToShow = notifications.slice(0, initialDisplayCount);
+    const remainingNotifications = notifications.slice(initialDisplayCount);
+
+    const createNotificationElement = (notif) => {
         const div = document.createElement('div');
         div.className = `notification-item ${!notif.read ? 'unread' : ''}`;
         div.dataset.id = notif.id;
+        if (notif.chatId) {
+            div.dataset.chatId = notif.chatId;
+        }
+
+        // Determine icon based on type (if available) or message content
+        let iconClass = 'ri-notification-3-line';
+        if (notif.type === 'message') iconClass = 'ri-message-3-line';
+        else if (notif.type === 'system') iconClass = 'ri-information-line';
+        else if (notif.message.toLowerCase().includes('welcome')) iconClass = 'ri-sparkling-line';
+        else if (notif.message.toLowerCase().includes('sold')) iconClass = 'ri-money-dollar-circle-line';
+
+        const timeString = notif.createdAt ? new Date(notif.createdAt.seconds * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Just now';
+
         div.innerHTML = `
-            <p>${notif.message}</p>
-            <small>${notif.createdAt ? new Date(notif.createdAt.seconds * 1000).toLocaleDateString() : 'Just now'}</small>
+            <div class="notif-icon">
+                <i class="${iconClass}"></i>
+            </div>
+            <div class="notif-content">
+                <div class="notif-message">${notif.message}</div>
+                <div class="notif-time">
+                    <i class="ri-time-line" style="font-size: 0.8em;"></i> ${timeString}
+                </div>
+            </div>
+            <button class="btn-delete-notif" data-id="${notif.id}" title="Dismiss">
+                <i class="ri-close-line"></i>
+            </button>
         `;
-        container.appendChild(div);
+        return div;
+    };
+
+    notificationsToShow.forEach(notif => {
+        container.appendChild(createNotificationElement(notif));
     });
+
+    if (remainingNotifications.length > 0) {
+        const showMoreBtn = document.createElement('button');
+        showMoreBtn.className = 'btn-text wide';
+        showMoreBtn.style.marginTop = '0.5rem';
+        showMoreBtn.style.fontSize = '0.9rem';
+        showMoreBtn.textContent = `Show ${remainingNotifications.length} more`;
+
+        showMoreBtn.onclick = () => {
+            showMoreBtn.remove();
+            remainingNotifications.forEach(notif => {
+                container.appendChild(createNotificationElement(notif));
+            });
+        };
+        container.appendChild(showMoreBtn);
+    }
 }
 
 export function renderReviews(reviews) {

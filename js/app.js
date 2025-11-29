@@ -1,5 +1,5 @@
 import { signUp, login, logout, onUserStatusChanged, loginWithGoogle, sendPasswordReset } from './auth.js';
-import { createListing, getListings, getListingById, startChat, deleteListing, getUserListings, incrementListingViews, addComment, getComments, getUserChats, getChatMessages, sendMessage, subscribeToNotifications, markNotificationRead, markAllNotificationsRead, deleteChat, subscribeToChatMessages, getUserById, addReview, getReviews } from './db.js';
+import { createListing, getListings, getListingById, startChat, deleteListing, getUserListings, incrementListingViews, addComment, getComments, getUserChats, getChatMessages, sendMessage, subscribeToNotifications, markNotificationRead, markAllNotificationsRead, deleteChat, subscribeToChatMessages, getUserById, addReview, getReviews, deleteNotification, getChatById, deleteAllNotifications, updateUserProfile } from './db.js';
 import { uploadImage } from './storage.js';
 import { showView, renderListings, renderListingDetails, updateAuthUI, renderProfile, renderComments, renderChatList, renderChatMessages, renderNotifications, showChatWindow, showChatList, renderReviews } from './ui.js';
 
@@ -66,6 +66,60 @@ function setupEventListeners() {
     safeAddEventListener('mark-all-read', 'click', () => {
         if (currentUser) markAllNotificationsRead(currentUser.uid);
     });
+    safeAddEventListener('delete-all-notifs', 'click', async () => {
+        if (currentUser && confirm("Are you sure you want to delete all notifications?")) {
+            await deleteAllNotifications(currentUser.uid);
+        }
+    });
+
+    // Notification Delete & Click Delegation
+    const notifList = document.getElementById('notification-list');
+    if (notifList) {
+        notifList.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.btn-delete-notif');
+            if (btn && currentUser) {
+                e.preventDefault();
+                e.stopPropagation(); // Prevent triggering item click
+                const id = btn.dataset.id;
+                try {
+                    await deleteNotification(currentUser.uid, id);
+                } catch (error) {
+                    console.error("Failed to delete notification", error);
+                }
+                return;
+            }
+
+            // Handle Notification Item Click
+            const item = e.target.closest('.notification-item');
+            if (item && currentUser) {
+                const chatId = item.dataset.chatId;
+                if (chatId) {
+                    // Close dropdown
+                    document.getElementById('notification-dropdown').classList.add('hidden');
+
+                    // Mark as read
+                    const notifId = item.dataset.id;
+                    markNotificationRead(currentUser.uid, notifId);
+
+                    // Redirect to Chat
+                    try {
+                        const chat = await getChatById(chatId);
+                        if (chat) {
+                            const partnerId = chat.participants.find(p => p !== currentUser.uid);
+                            const partner = await getUserById(partnerId);
+                            const partnerName = partner ? partner.displayName : "User";
+
+                            await loadChat(); // Ensure chat view and list are loaded
+                            loadChatMessages(chatId, partnerName);
+                        }
+                    } catch (err) {
+                        console.error("Error redirecting to chat:", err);
+                    }
+                }
+            }
+        });
+    }
+
     safeAddEventListener('profile-logout-btn', 'click', handleLogout);
 
     // Auth Forms
@@ -134,6 +188,12 @@ function setupEventListeners() {
             loadHome();
         });
     }
+    const searchFilter = document.getElementById('search-filter');
+    if (searchFilter) {
+        searchFilter.addEventListener('input', () => {
+            loadHome();
+        });
+    }
 
     // Mobile Category Scroll
     const categoryItems = document.querySelectorAll('.category-item');
@@ -194,6 +254,16 @@ function setupEventListeners() {
         }
     });
 
+    const btnBackToBrowse = document.getElementById('btn-back-to-browse');
+    if (btnBackToBrowse) {
+        const handleBack = (e) => {
+            e.preventDefault();
+            loadHome();
+        };
+        btnBackToBrowse.addEventListener('click', handleBack);
+        btnBackToBrowse.addEventListener('touchstart', handleBack);
+    }
+
     safeAddEventListener('mobile-nav-profile', 'click', (e) => {
         e.preventDefault();
         if (currentUser) {
@@ -201,6 +271,25 @@ function setupEventListeners() {
             updateMobileNavState('mobile-nav-profile');
         } else {
             showView('view-login');
+        }
+    });
+
+    // Delegated Event Listeners for Dynamic Content
+    document.body.addEventListener('click', (e) => {
+        // View Details
+        const btnDetails = e.target.closest('.btn-details');
+        if (btnDetails) {
+            const id = btnDetails.dataset.id;
+            loadListingDetails(id);
+        }
+
+        // View Seller Profile
+        const sellerLink = e.target.closest('.seller-link');
+        if (sellerLink) {
+            const sellerId = sellerLink.dataset.sellerId;
+            if (sellerId) {
+                loadUserProfile(sellerId);
+            }
         }
     });
 
@@ -229,6 +318,100 @@ function setupEventListeners() {
     document.addEventListener('submit', (e) => {
         if (e.target && e.target.id === 'review-form') {
             handleReviewSubmit(e);
+        }
+    });
+
+    // Edit Profile
+    safeAddEventListener('btn-edit-profile', 'click', () => {
+        if (!currentUser) return;
+        document.getElementById('edit-name').value = currentUser.displayName || '';
+        document.getElementById('edit-phone').value = currentUser.phoneNumber || '';
+        document.getElementById('edit-course').value = currentUser.course || '';
+        document.getElementById('edit-year').value = currentUser.year || '';
+        document.getElementById('edit-division').value = currentUser.division || '';
+
+        // Load current photo
+        const previewImg = document.getElementById('edit-photo-preview');
+        const previewIcon = document.getElementById('edit-photo-icon');
+        if (currentUser.photoURL) {
+            previewImg.src = currentUser.photoURL;
+            previewImg.style.display = 'block';
+            previewIcon.style.display = 'none';
+        } else {
+            previewImg.src = '';
+            previewImg.style.display = 'none';
+            previewIcon.style.display = 'block';
+        }
+
+        document.getElementById('edit-profile-modal').classList.remove('hidden');
+    });
+
+    safeAddEventListener('close-edit-profile', 'click', () => {
+        document.getElementById('edit-profile-modal').classList.add('hidden');
+    });
+
+    // Handle Photo Preview
+    safeAddEventListener('edit-photo', 'change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const previewImg = document.getElementById('edit-photo-preview');
+                const previewIcon = document.getElementById('edit-photo-icon');
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+                previewIcon.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    safeAddEventListener('edit-profile-form', 'submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('edit-name').value;
+        const phone = document.getElementById('edit-phone').value;
+        const course = document.getElementById('edit-course').value;
+        const year = document.getElementById('edit-year').value;
+        const division = document.getElementById('edit-division').value;
+        const photoFile = document.getElementById('edit-photo').files[0];
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.textContent;
+        submitBtn.textContent = 'Saving...';
+        submitBtn.disabled = true;
+
+        try {
+            let photoURL = currentUser.photoURL;
+
+            if (photoFile) {
+                photoURL = await uploadImage(photoFile);
+            }
+
+            await updateUserProfile(currentUser.uid, {
+                displayName: name,
+                phoneNumber: phone,
+                course: course,
+                year: year,
+                division: division,
+                photoURL: photoURL
+            });
+
+            // Update local user object
+            currentUser.displayName = name;
+            currentUser.phoneNumber = phone;
+            currentUser.course = course;
+            currentUser.year = year;
+            currentUser.division = division;
+            currentUser.photoURL = photoURL;
+
+            document.getElementById('edit-profile-modal').classList.add('hidden');
+            loadUserProfile(currentUser.uid); // Refresh view
+            alert("Profile updated successfully!");
+        } catch (error) {
+            alert("Failed to update profile: " + error.message);
+        } finally {
+            submitBtn.textContent = originalBtnText;
+            submitBtn.disabled = false;
         }
     });
 
@@ -329,9 +512,13 @@ async function loadHome() {
     showView('view-home');
     try {
         const categoryFilter = document.getElementById('category-filter');
+        const searchFilter = document.getElementById('search-filter');
         const filters = {};
         if (categoryFilter && categoryFilter.value) {
             filters.category = categoryFilter.value;
+        }
+        if (searchFilter && searchFilter.value) {
+            filters.search = searchFilter.value;
         }
 
         const listings = await getListings(filters);
@@ -368,22 +555,20 @@ async function loadListingDetails(id) {
 
 async function loadUserProfile(userId) {
     try {
-        // If viewing own profile, use currentUser data. 
-        // If viewing others, we might need a getUserById (future task), but for now we assume own profile or we pass user object.
-        // For this iteration, let's assume we are viewing OUR OWN profile or we need to fetch user details if it's someone else.
-        // Since the requirement is mainly "click on their profile", let's start with CURRENT USER.
-
-        // If userId is different from currentUser, we would need to fetch that user's public info.
-        // For now, let's support viewing OWN profile as per the primary request flow.
-
         let user = currentUser;
-        if (userId !== currentUser.uid) {
-            // TODO: Implement getUserById in db.js to fetch other user's details
-            console.warn("Viewing other profiles not fully implemented yet, showing current user context");
+        let isOwnProfile = true;
+
+        if (userId && userId !== currentUser.uid) {
+            isOwnProfile = false;
+            user = await getUserById(userId);
+            if (!user) {
+                alert("User not found");
+                return;
+            }
         }
 
         const listings = await getUserListings(userId);
-        renderProfile(user, listings);
+        renderProfile(user, listings, isOwnProfile);
         showView('view-profile');
     } catch (error) {
         console.error("Failed to load profile", error);
@@ -628,14 +813,35 @@ async function loadChatMessages(chatId, partnerIdOrName) {
     showChatWindow();
 
     // Update Header Name
+    // Update Header Name
     const nameEl = document.getElementById('chat-partner-name');
+    const titleEl = document.getElementById('chat-item-title');
+
+    // Reset title initially
+    titleEl.textContent = "Loading...";
+
+    // Fetch chat details to get listing ID
+    try {
+        const chat = await getChatById(chatId);
+        if (chat && chat.listingId) {
+            const listing = await getListingById(chat.listingId);
+            // Set Product Title as Main Heading (h4)
+            nameEl.textContent = listing ? listing.title : "Item Unavailable";
+        } else {
+            nameEl.textContent = "Item Inquiry";
+        }
+    } catch (err) {
+        console.error("Error fetching chat details:", err);
+        nameEl.textContent = "Chat";
+    }
+
     if (typeof partnerIdOrName === 'string') {
         // It's a name passed from UI
-        nameEl.textContent = partnerIdOrName;
+        titleEl.textContent = partnerIdOrName;
     } else {
         // It's an ID (from contact seller), fetch name
         const user = await getUserById(partnerIdOrName);
-        nameEl.textContent = user ? user.displayName : "User";
+        titleEl.textContent = user ? user.displayName : "User";
     }
 
     // Unsubscribe previous listener if any

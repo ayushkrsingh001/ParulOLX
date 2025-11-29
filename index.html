@@ -17,29 +17,35 @@
         <div class="wrapper nav-wrapper">
             <div class="logo"><i class="ri-store-2-line"></i> Campus OLX</div>
             <div class="nav-items" id="auth-links">
-                <a href="#" id="nav-login" class="btn-main">Login / Sign Up</a>
+                <a href="#" id="nav-login" class="btn-main"><i class="ri-login-box-line"></i> <span>Login / Sign
+                        Up</span></a>
             </div>
             <div class="nav-items hidden" id="user-links">
-                <a href="#" id="nav-home"><i class="ri-home-4-line"></i> Browse</a>
-                <a href="#" id="nav-sell"><i class="ri-add-circle-line"></i> Sell</a>
-                <a href="#" id="nav-chat"><i class="ri-message-3-line"></i> Chat <span id="nav-chat-badge"
+                <a href="#" id="nav-home"><i class="ri-home-4-line"></i> <span>Browse</span></a>
+                <a href="#" id="nav-sell"><i class="ri-add-circle-line"></i> <span>Sell</span></a>
+                <a href="#" id="nav-chat"><i class="ri-message-3-line"></i> <span>Chat</span> <span id="nav-chat-badge"
                         class="badge hidden">0</span></a>
                 <div class="notification-wrapper" style="position: relative;">
-                    <a href="#" id="nav-notifications"><i class="ri-notification-3-line"></i> <span
-                            id="notification-badge" class="badge hidden">0</span></a>
+                    <a href="#" id="nav-notifications"><i class="ri-notification-3-line"></i> <span>Notifications</span>
+                        <span id="notification-badge" class="badge hidden">0</span></a>
                     <div id="notification-dropdown" class="notification-dropdown hidden">
                         <div class="dropdown-header">
                             <h3>Notifications</h3>
-                            <button id="mark-all-read" class="btn-text">Mark all read</button>
+                            <div style="display: flex; gap: 10px;">
+                                <button id="mark-all-read" class="btn-text">Mark all read</button>
+                                <button id="delete-all-notifs" class="btn-text"
+                                    style="color: var(--danger-color);">Delete All</button>
+                            </div>
                         </div>
                         <div id="notification-list"></div>
                     </div>
                 </div>
-                <a href="#" id="nav-profile"><i class="ri-user-3-line"></i> Profile</a>
-                <div id="user-name-display"
+                <a href="#" id="nav-profile"><i class="ri-user-3-line"></i> <span>Profile</span></a>
+                <div id="user-name-display" class="desktop-only"
                     style="font-weight: 600; color: var(--text-main); padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 20px; border: 1px solid var(--border-color);">
                     Student</div>
-                <a href="#" id="nav-logout" class="btn-main">Logout</a>
+                <a href="#" id="nav-logout" class="btn-main"><i class="ri-logout-box-r-line"></i>
+                    <span>Logout</span></a>
             </div>
         </div>
     </nav>
@@ -225,7 +231,7 @@
         <!-- Listing Details View -->
         <div id="view-details" class="view hidden">
             <div class="wrapper">
-                <button onclick="showView('view-home')" class="btn-back"><i class="ri-arrow-left-line"></i> Back to
+                <button id="btn-back-to-browse" class="btn-back"><i class="ri-arrow-left-line"></i> Back to
                     Browse</button>
                 <div id="listing-details-content" class="details-box">
                     <!-- Details injected here -->
@@ -290,11 +296,11 @@
                     <div class="profile-stats">
                         <div class="stat-card">
                             <h3 id="stat-active">0</h3>
-                            <p>Active</p>
+                            <p>Active Listings</p>
                         </div>
                         <div class="stat-card">
                             <h3 id="stat-sold">0</h3>
-                            <p>Sold</p>
+                            <p>Sold Items</p>
                         </div>
                         <div class="stat-card">
                             <h3 id="stat-views">0</h3>
@@ -305,9 +311,64 @@
                         style="border-color: var(--danger-color); color: var(--danger-color);">
                         <i class="ri-logout-box-r-line"></i> Logout
                     </button>
+                    <button id="btn-edit-profile" class="btn-alt" style="margin-top: 1rem;">
+                        <i class="ri-edit-line"></i> Edit Profile
+                    </button>
                 </div>
 
-                <h3 style="margin: 2rem 0 1rem;">My Listings</h3>
+                <!-- Edit Profile Modal -->
+                <div id="edit-profile-modal" class="modal hidden">
+                    <div class="modal-content auth-box">
+                        <span id="close-edit-profile" class="close-modal">&times;</span>
+                        <h2>Edit Profile</h2>
+                        <form id="edit-profile-form">
+                            <div class="input-group" style="text-align: center; margin-bottom: 1.5rem;">
+                                <div class="profile-avatar-preview"
+                                    style="width: 80px; height: 80px; margin: 0 auto 1rem; border-radius: 50%; overflow: hidden; background: var(--bg-dark); display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary-color);">
+                                    <img id="edit-photo-preview" src="" alt="Profile Preview"
+                                        style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                                    <i id="edit-photo-icon" class="ri-user-line"
+                                        style="font-size: 2rem; color: var(--text-secondary);"></i>
+                                </div>
+                                <label for="edit-photo" class="btn-alt"
+                                    style="font-size: 0.8rem; padding: 0.5rem 1rem; cursor: pointer;">
+                                    <i class="ri-camera-line"></i> Change Photo
+                                </label>
+                                <input type="file" id="edit-photo" accept="image/*" style="display: none;">
+                            </div>
+                            <div class="input-group">
+                                <label>Full Name</label>
+                                <input type="text" id="edit-name" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Phone Number</label>
+                                <input type="tel" id="edit-phone" placeholder="+91 9876543210">
+                            </div>
+                            <div class="input-group">
+                                <label>Course</label>
+                                <input type="text" id="edit-course" placeholder="e.g. B.Tech CSE">
+                            </div>
+                            <div class="input-group">
+                                <label>Year</label>
+                                <select id="edit-year">
+                                    <option value="">Select Year</option>
+                                    <option value="1st Year">1st Year</option>
+                                    <option value="2nd Year">2nd Year</option>
+                                    <option value="3rd Year">3rd Year</option>
+                                    <option value="4th Year">4th Year</option>
+                                    <option value="5th Year">5th Year</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Division</label>
+                                <input type="text" id="edit-division" placeholder="e.g. 1A5">
+                            </div>
+                            <button type="submit" class="btn-main wide">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+
+                <h3 id="profile-listings-heading" style="margin: 2rem 0 1rem;">My Listings</h3>
                 <div id="profile-listings-container" class="listings-grid">
                     <!-- Listings injected here -->
                 </div>
