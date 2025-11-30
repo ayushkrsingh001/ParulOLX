@@ -786,6 +786,13 @@ select {
         font-size: 2.5rem;
     }
 
+    .logo {
+        font-size: 2.2rem;
+        /* Increased size */
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
     .main-nav {
         padding: 0.5rem 0;
         height: 150px;
@@ -817,8 +824,7 @@ select {
 
     /* Center the login button if it's the only item */
     #auth-links.nav-items {
-        justify-content: center;
-        padding: 0;
+        display: none !important;
     }
 
     .nav-items a {
