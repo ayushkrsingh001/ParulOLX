@@ -7,7 +7,8 @@ import {
     updateProfile,
     GoogleAuthProvider,
     signInWithPopup,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { doc, setDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -40,6 +41,9 @@ export async function signUp(email, password, fullName) {
             createdAt: serverTimestamp(),
             photoURL: user.photoURL || "https://via.placeholder.com/150"
         });
+
+        // Send verification email
+        await sendEmailVerification(user);
 
         return user;
     } catch (error) {
@@ -117,4 +121,14 @@ export function onUserStatusChanged(callback) {
     onAuthStateChanged(auth, (user) => {
         callback(user);
     });
+}
+
+// Send Verification Email
+export async function sendVerificationEmail(user) {
+    try {
+        await sendEmailVerification(user);
+    } catch (error) {
+        console.error("Error sending verification email:", error);
+        throw error;
+    }
 }

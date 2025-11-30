@@ -1,4 +1,4 @@
-import { signUp, login, logout, onUserStatusChanged, loginWithGoogle, sendPasswordReset } from './auth.js';
+import { signUp, login, logout, onUserStatusChanged, loginWithGoogle, sendPasswordReset, sendVerificationEmail } from './auth.js';
 import { createListing, getListings, getListingById, startChat, deleteListing, getUserListings, incrementListingViews, addComment, getComments, getUserChats, getChatMessages, sendMessage, subscribeToNotifications, markNotificationRead, markAllNotificationsRead, deleteChat, subscribeToChatMessages, getUserById, addReview, getReviews, deleteNotification, getChatById, deleteAllNotifications, updateUserProfile } from './db.js';
 import { uploadImage } from './storage.js';
 import { showView, renderListings, renderListingDetails, updateAuthUI, renderProfile, renderComments, renderChatList, renderChatMessages, renderNotifications, showChatWindow, showChatList, renderReviews } from './ui.js';
@@ -18,8 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUser = user;
             updateAuthUI(user);
             if (user) {
-                loadHome();
-                setupRealtimeListeners(user.uid);
+                if (user.emailVerified) {
+                    loadHome();
+                    setupRealtimeListeners(user.uid);
+                } else {
+                    document.getElementById('verify-email-address').textContent = user.email;
+                    showView('view-verify-email');
+                }
             } else {
                 showView('view-login');
             }
@@ -148,6 +153,52 @@ function setupEventListeners() {
         document.getElementById('login-container').classList.remove('hidden');
     });
     safeAddEventListener('forgot-password-form', 'submit', handleForgotPassword);
+
+    // Email Verification
+    safeAddEventListener('btn-check-verification', 'click', async () => {
+        if (currentUser) {
+            const btn = document.getElementById('btn-check-verification');
+            const originalText = btn.textContent;
+            btn.textContent = "Checking...";
+            btn.disabled = true;
+            try {
+                await currentUser.reload();
+                if (currentUser.emailVerified) {
+                    alert("Email verified successfully!");
+                    loadHome();
+                    setupRealtimeListeners(currentUser.uid);
+                } else {
+                    alert("Email not yet verified. Please check your inbox or click Resend.");
+                }
+            } catch (error) {
+                console.error("Error checking verification", error);
+                alert("Error checking status. Please try again.");
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+    });
+
+    safeAddEventListener('btn-resend-verification', 'click', async () => {
+        if (currentUser) {
+            const btn = document.getElementById('btn-resend-verification');
+            btn.disabled = true;
+            try {
+                await sendVerificationEmail(currentUser);
+                alert("Verification link resent to " + currentUser.email);
+            } catch (error) {
+                alert("Failed to resend link: " + error.message);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    });
+
+    safeAddEventListener('btn-back-to-login-verify', 'click', async (e) => {
+        e.preventDefault();
+        await handleLogout();
+    });
 
     // Google Login
     safeAddEventListener('google-login-btn', 'click', handleGoogleLogin);
@@ -597,7 +648,7 @@ async function handleSignup(e) {
 
     try {
         await signUp(email, password, name);
-        alert("Account created successfully! You are now logged in.");
+        // Auth listener will handle redirect to verification view
         // Auth listener will handle redirect
     } catch (error) {
         alert("Signup failed: " + error.message);
