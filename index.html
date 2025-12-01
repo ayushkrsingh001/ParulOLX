@@ -8,6 +8,14 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function () {
+            // https://dashboard.emailjs.com/admin/account
+            // Replace with your public key
+            emailjs.init("fDfpcInqNx8lx7rqx");
+        })();
+    </script>
 </head>
 
 <body>
@@ -120,29 +128,6 @@
                     </form>
                     <p style="margin-top: 1rem; text-align: center;"><a href="#" id="back-to-login"
                             style="color: var(--primary-color); font-weight: 600;">Back to Login</a></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Verify Email View -->
-        <div id="view-verify-email" class="view hidden">
-            <div class="auth-container">
-                <div class="auth-box">
-                    <div style="text-align: center; margin-bottom: 2rem;">
-                        <i class="ri-mail-send-line" style="font-size: 4rem; color: var(--primary-color);"></i>
-                    </div>
-                    <h2>Verify Your Email</h2>
-                    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 1.5rem;">
-                        We've sent a verification link to <strong id="verify-email-address">email@example.com</strong>.
-                        Please check your inbox (and spam) and click the link to activate your account.
-                    </p>
-                    <button id="btn-check-verification" class="btn-main wide">I've Verified My Email</button>
-                    <button id="btn-resend-verification" class="btn-alt wide" style="margin-top: 1rem;">Resend
-                        Link</button>
-                    <p style="margin-top: 1.5rem; text-align: center;">
-                        <a href="#" id="btn-back-to-login-verify" style="color: var(--text-secondary);">Back to
-                            Login</a>
-                    </p>
                 </div>
             </div>
         </div>
@@ -336,63 +321,67 @@
                     </button>
                 </div>
 
-                <!-- Edit Profile Modal -->
-                <div id="edit-profile-modal" class="modal hidden">
-                    <div class="modal-content auth-box">
-                        <span id="close-edit-profile" class="close-modal">&times;</span>
-                        <h2>Edit Profile</h2>
-                        <form id="edit-profile-form">
-                            <div class="input-group" style="text-align: center; margin-bottom: 1.5rem;">
-                                <div class="profile-avatar-preview"
-                                    style="width: 80px; height: 80px; margin: 0 auto 1rem; border-radius: 50%; overflow: hidden; background: var(--bg-dark); display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary-color);">
-                                    <img id="edit-photo-preview" src="" alt="Profile Preview"
-                                        style="width: 100%; height: 100%; object-fit: cover; display: none;">
-                                    <i id="edit-photo-icon" class="ri-user-line"
-                                        style="font-size: 2rem; color: var(--text-secondary);"></i>
-                                </div>
-                                <label for="edit-photo" class="btn-alt"
-                                    style="font-size: 0.8rem; padding: 0.5rem 1rem; cursor: pointer;">
-                                    <i class="ri-camera-line"></i> Change Photo
-                                </label>
-                                <input type="file" id="edit-photo" accept="image/*" style="display: none;">
-                            </div>
-                            <div class="input-group">
-                                <label>Full Name</label>
-                                <input type="text" id="edit-name" required>
-                            </div>
-                            <div class="input-group">
-                                <label>Phone Number</label>
-                                <input type="tel" id="edit-phone" placeholder="+91 9876543210">
-                            </div>
-                            <div class="input-group">
-                                <label>Course</label>
-                                <input type="text" id="edit-course" placeholder="e.g. B.Tech CSE">
-                            </div>
-                            <div class="input-group">
-                                <label>Year</label>
-                                <select id="edit-year">
-                                    <option value="">Select Year</option>
-                                    <option value="1st Year">1st Year</option>
-                                    <option value="2nd Year">2nd Year</option>
-                                    <option value="3rd Year">3rd Year</option>
-                                    <option value="4th Year">4th Year</option>
-                                    <option value="5th Year">5th Year</option>
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <label>Division</label>
-                                <input type="text" id="edit-division" placeholder="e.g. 1A5">
-                            </div>
-                            <button type="submit" class="btn-main wide">Save Changes</button>
-                        </form>
-                    </div>
-                </div>
+            </div>
 
-                <h3 id="profile-listings-heading" style="margin: 2rem 0 1rem;">My Listings</h3>
-                <div id="profile-listings-container" class="listings-grid">
-                    <!-- Listings injected here -->
+            <!-- Edit Profile Modal -->
+            <div id="edit-profile-modal" class="modal hidden">
+                <div class="modal-content auth-box">
+                    <span id="close-edit-profile" class="close-modal">&times;</span>
+                    <h2>Edit Profile</h2>
+                    <form id="edit-profile-form">
+                        <div class="input-group" style="text-align: center; margin-bottom: 1.5rem;">
+                            <div class="profile-avatar-preview"
+                                style="width: 80px; height: 80px; margin: 0 auto 1rem; border-radius: 50%; overflow: hidden; background: var(--bg-dark); display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary-color);">
+                                <img id="edit-photo-preview" src="" alt="Profile Preview"
+                                    style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                                <i id="edit-photo-icon" class="ri-user-line"
+                                    style="font-size: 2rem; color: var(--text-secondary);"></i>
+                            </div>
+                            <label for="edit-photo" class="btn-alt"
+                                style="font-size: 0.8rem; padding: 0.5rem 1rem; cursor: pointer;">
+                                <i class="ri-camera-line"></i> Change Photo
+                            </label>
+                            <input type="file" id="edit-photo" accept="image/*" style="display: none;">
+                        </div>
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" id="edit-name" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="edit-phone" placeholder="+91 9876543210">
+                        </div>
+                        <div class="input-group">
+                            <label>Course</label>
+                            <input type="text" id="edit-course" placeholder="e.g. B.Tech CSE">
+                        </div>
+                        <div class="input-group">
+                            <label>Year</label>
+                            <select id="edit-year">
+                                <option value="">Select Year</option>
+                                <option value="1st Year">1st Year</option>
+                                <option value="2nd Year">2nd Year</option>
+                                <option value="3rd Year">3rd Year</option>
+                                <option value="4th Year">4th Year</option>
+                                <option value="5th Year">5th Year</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Division</label>
+                            <input type="text" id="edit-division" placeholder="e.g. 1A5">
+                        </div>
+                        <button type="submit" class="btn-main wide">Save Changes</button>
+                    </form>
                 </div>
             </div>
+
+
+
+            <h3 id="profile-listings-heading" style="margin: 2rem 0 1rem;">My Listings</h3>
+            <div id="profile-listings-container" class="listings-grid">
+                <!-- Listings injected here -->
+            </div>
+        </div>
         </div>
         <!-- Full Photo Modal -->
         <div id="full-photo-modal" class="full-photo-modal hidden">
@@ -402,6 +391,29 @@
                 <!-- Images injected here -->
             </div>
             <button id="full-photo-next" class="nav-btn next-btn"><i class="ri-arrow-right-s-line"></i></button>
+        </div>
+        <!-- OTP Verification Modal -->
+        <div id="otp-modal" class="modal hidden">
+            <div class="modal-content auth-box">
+                <span id="close-otp-modal" class="close-modal">&times;</span>
+                <h2>Verify Email</h2>
+                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    We've sent a verification code to <span id="otp-email-display"
+                        style="color: var(--primary-color); font-weight: 600;"></span>
+                </p>
+                <form id="otp-form">
+                    <div class="input-group">
+                        <label>Enter OTP</label>
+                        <input type="text" id="otp-input" placeholder="123456" maxlength="6"
+                            style="text-align: center; letter-spacing: 5px; font-size: 1.5rem; font-weight: 700;"
+                            required>
+                    </div>
+                    <button type="submit" class="btn-main wide">Verify & Create Account</button>
+                </form>
+                <p style="margin-top: 1rem; text-align: center;">
+                    <button id="resend-otp" class="btn-text" style="font-size: 0.9rem;">Resend Code</button>
+                </p>
+            </div>
         </div>
     </main>
 

@@ -1,9 +1,66 @@
-import { signUp, login, logout, onUserStatusChanged, loginWithGoogle, sendPasswordReset, sendVerificationEmail } from './auth.js';
+import { signUp, login, logout, onUserStatusChanged, loginWithGoogle, sendPasswordReset } from './auth.js';
 import { createListing, getListings, getListingById, startChat, deleteListing, getUserListings, incrementListingViews, addComment, getComments, getUserChats, getChatMessages, sendMessage, subscribeToNotifications, markNotificationRead, markAllNotificationsRead, deleteChat, subscribeToChatMessages, getUserById, addReview, getReviews, deleteNotification, getChatById, deleteAllNotifications, updateUserProfile } from './db.js';
 import { uploadImage } from './storage.js';
 import { showView, renderListings, renderListingDetails, updateAuthUI, renderProfile, renderComments, renderChatList, renderChatMessages, renderNotifications, showChatWindow, showChatList, renderReviews } from './ui.js';
 
 let currentUser = null;
+let pendingSignupData = null;
+
+// EmailJS Configuration
+const EMAILJS_SERVICE_ID = "service_a22hlja";
+const EMAILJS_TEMPLATE_ID = "template_ff76m2t";
+
+async function sendOTPEmail(email, name, otp) {
+    if (typeof emailjs === 'undefined') {
+        alert("EmailJS library not loaded. Check your internet connection or ad blocker.");
+        console.error("EmailJS not defined");
+        return false;
+    }
+
+    // Calculate expiration time (15 minutes from now)
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 15);
+    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const templateParams = {
+        to_email: email,
+        email: email,
+        reply_to: email,
+        to_name: name,
+
+        // OTP Variables
+        otp_code: String(otp), // Force string
+        otp: String(otp),
+        code: String(otp),
+
+        // Additional Template Variables found in your screenshot
+        time: timeString,
+        company_name: "Campus OLX",
+
+        message: `Your verification code is: ${otp}`
+    };
+
+    // Debugging: Alert the user so they know what SHOULD be in the email
+    // This helps confirm if the app is generating it correctly.
+    console.log("Generated OTP:", otp);
+
+    try {
+        console.log("Sending email via EmailJS...", templateParams);
+        // Add a timeout race
+        const sendPromise = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out")), 10000));
+
+        await Promise.race([sendPromise, timeoutPromise]);
+
+        console.log("Email sent successfully");
+        alert(`OTP sent to ${email}. Please check your inbox.`);
+        return true;
+    } catch (error) {
+        console.error("EmailJS Error:", error);
+        alert(`Failed to send email. \nError: ${error.message || JSON.stringify(error)}\n\n(Simulation) OTP is: ${otp}`);
+        return false;
+    }
+}
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
@@ -18,13 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUser = user;
             updateAuthUI(user);
             if (user) {
-                if (user.emailVerified) {
-                    loadHome();
-                    setupRealtimeListeners(user.uid);
-                } else {
-                    document.getElementById('verify-email-address').textContent = user.email;
-                    showView('view-verify-email');
-                }
+                loadHome();
+                setupRealtimeListeners(user.uid);
             } else {
                 showView('view-login');
             }
@@ -153,52 +205,6 @@ function setupEventListeners() {
         document.getElementById('login-container').classList.remove('hidden');
     });
     safeAddEventListener('forgot-password-form', 'submit', handleForgotPassword);
-
-    // Email Verification
-    safeAddEventListener('btn-check-verification', 'click', async () => {
-        if (currentUser) {
-            const btn = document.getElementById('btn-check-verification');
-            const originalText = btn.textContent;
-            btn.textContent = "Checking...";
-            btn.disabled = true;
-            try {
-                await currentUser.reload();
-                if (currentUser.emailVerified) {
-                    alert("Email verified successfully!");
-                    loadHome();
-                    setupRealtimeListeners(currentUser.uid);
-                } else {
-                    alert("Email not yet verified. Please check your inbox or click Resend.");
-                }
-            } catch (error) {
-                console.error("Error checking verification", error);
-                alert("Error checking status. Please try again.");
-            } finally {
-                btn.textContent = originalText;
-                btn.disabled = false;
-            }
-        }
-    });
-
-    safeAddEventListener('btn-resend-verification', 'click', async () => {
-        if (currentUser) {
-            const btn = document.getElementById('btn-resend-verification');
-            btn.disabled = true;
-            try {
-                await sendVerificationEmail(currentUser);
-                alert("Verification link resent to " + currentUser.email);
-            } catch (error) {
-                alert("Failed to resend link: " + error.message);
-            } finally {
-                btn.disabled = false;
-            }
-        }
-    });
-
-    safeAddEventListener('btn-back-to-login-verify', 'click', async (e) => {
-        e.preventDefault();
-        await handleLogout();
-    });
 
     // Google Login
     safeAddEventListener('google-login-btn', 'click', handleGoogleLogin);
@@ -528,6 +534,59 @@ function setupEventListeners() {
         // Optional: Clear active state if desired, but keeping it is fine
         // document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
     });
+
+    // OTP Modal Interactions
+    safeAddEventListener('close-otp-modal', 'click', () => {
+        document.getElementById('otp-modal').classList.add('hidden');
+    });
+
+    safeAddEventListener('otp-form', 'submit', async (e) => {
+        e.preventDefault();
+        const enteredOTP = document.getElementById('otp-input').value;
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+
+        if (!pendingSignupData) {
+            alert("Session expired. Please sign up again.");
+            document.getElementById('otp-modal').classList.add('hidden');
+            return;
+        }
+
+        if (enteredOTP === pendingSignupData.otp) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Creating Account...";
+            try {
+                await signUp(pendingSignupData.email, pendingSignupData.password, pendingSignupData.name);
+                alert("Account created successfully! You are now logged in.");
+                document.getElementById('otp-modal').classList.add('hidden');
+                document.getElementById('signup-form').reset();
+                pendingSignupData = null;
+            } catch (error) {
+                alert("Signup failed: " + error.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Verify & Create Account";
+            }
+        } else {
+            alert("Invalid OTP. Please try again.");
+        }
+    });
+
+    safeAddEventListener('resend-otp', 'click', async (e) => {
+        e.preventDefault();
+        if (pendingSignupData) {
+            const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+            pendingSignupData.otp = newOtp;
+
+            const btn = document.getElementById('resend-otp');
+            const originalText = btn.textContent;
+            btn.textContent = "Sending...";
+            btn.disabled = true;
+
+            await sendOTPEmail(pendingSignupData.email, pendingSignupData.name, newOtp);
+
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    });
 }
 
 async function handleDeleteChat(chatId) {
@@ -646,13 +705,41 @@ async function handleSignup(e) {
     const email = e.target.email.value;
     const password = e.target.password.value;
 
-    try {
-        await signUp(email, password, name);
-        // Auth listener will handle redirect to verification view
-        // Auth listener will handle redirect
-    } catch (error) {
-        alert("Signup failed: " + error.message);
+    // Basic validation
+    if (!email.endsWith('.edu') && !email.endsWith('.ac.in') && !email.endsWith('@gmail.com')) {
+        alert("Please use a valid university email address (.edu, .ac.in) or Gmail.");
+        return;
     }
+
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Store pending data
+    pendingSignupData = { name, email, password, otp };
+
+    // Send OTP
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = "Sending OTP...";
+    submitBtn.disabled = true;
+
+    try {
+        await sendOTPEmail(email, name, otp);
+    } catch (error) {
+        // Error handled in sendOTPEmail, just reset button state
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return; // Stop further execution if OTP email failed
+    }
+
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+
+    // Show Modal
+    document.getElementById('otp-email-display').textContent = email;
+    document.getElementById('otp-modal').classList.remove('hidden');
+    document.getElementById('otp-input').value = '';
+    document.getElementById('otp-input').focus();
 }
 
 async function handleForgotPassword(e) {
