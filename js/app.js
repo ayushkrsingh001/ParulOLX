@@ -7,8 +7,8 @@ let currentUser = null;
 let pendingSignupData = null;
 
 // EmailJS Configuration
-const EMAILJS_SERVICE_ID = "service_a22hlja";
-const EMAILJS_TEMPLATE_ID = "template_ff76m2t";
+const EMAILJS_SERVICE_ID = "service_jwrtupj";
+const EMAILJS_TEMPLATE_ID = "template_cgj56io";
 
 async function sendOTPEmail(email, name, otp) {
     if (typeof emailjs === 'undefined') {
@@ -36,6 +36,7 @@ async function sendOTPEmail(email, name, otp) {
         // Additional Template Variables found in your screenshot
         time: timeString,
         company_name: "Campus OLX",
+        user_name: name,
 
         message: `Your verification code is: ${otp}`
     };
