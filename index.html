@@ -4,10 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#00BFFF">
     <title>Campus OLX - Student Marketplace</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function () {
@@ -48,8 +49,7 @@
                     </div>
                 </div>
                 <a href="#" id="nav-profile"><i class="ri-user-3-line"></i> <span>Profile</span></a>
-                <div id="user-name-display" class="desktop-only"
-                    style="font-weight: 600; color: var(--text-main); padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 20px; border: 1px solid var(--border-color);">
+                <div id="user-name-display" class="desktop-only">
                     Student</div>
                 <a href="#" id="nav-logout" class="btn-main"><i class="ri-logout-box-r-line"></i>
                     <span>Logout</span></a>
@@ -376,7 +376,10 @@
 
 
 
-            <h3 id="profile-listings-heading" style="margin: 2rem 0 1rem;">My Listings</h3>
+            <div class="section-header">
+                <i class="ri-list-check-2"></i>
+                <h3>My Listings</h3>
+            </div>
             <div id="profile-listings-container" class="listings-grid">
                 <!-- Listings injected here -->
             </div>

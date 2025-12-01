@@ -20,9 +20,9 @@
     --border-color: #e2e8f0;
     --border-hover: #cbd5e1;
 
-    --header-bg: #0f172a;
-    /* Dark Header */
-    --header-text: #f8fafc;
+    --header-bg: linear-gradient(135deg, #00BFFF 0%, #1E90FF 100%);
+    /* Sky Blue Header */
+    --header-text: #ffffff;
 
     --success-color: #10b981;
     --danger-color: #ef4444;
@@ -138,7 +138,7 @@ body::after {
 }
 
 .logo i {
-    color: var(--primary-color);
+    color: white;
 }
 
 .nav-items {
@@ -149,8 +149,8 @@ body::after {
 
 .nav-items a {
     text-decoration: none;
-    color: #cbd5e1;
-    /* Light gray for dark header */
+    color: rgba(255, 255, 255, 0.9);
+    /* White with slight transparency */
     font-weight: 500;
     font-size: 0.95rem;
     transition: all 0.2s ease;
@@ -179,10 +179,21 @@ body::after {
 #user-name-display {
     font-weight: 600;
     color: white;
-    padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1.25rem;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+#user-name-display:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
 /* Buttons */
@@ -883,6 +894,7 @@ select {
         padding: 0.5rem 0;
         height: 150px;
         /* Auto height for 1 row */
+        background: var(--header-bg) !important;
     }
 
     .nav-wrapper {
@@ -909,9 +921,14 @@ select {
     }
 
     /* Center the login button if it's the only item */
+    /* Hide login button on mobile */
     #auth-links.nav-items {
-        justify-content: center;
-        padding: 0;
+        display: none !important;
+    }
+
+    .logo {
+        font-size: 2rem !important;
+        margin-bottom: 0.5rem;
     }
 
     .nav-items a {
@@ -922,7 +939,7 @@ select {
         align-items: center;
         justify-content: center;
         position: relative;
-        color: var(--text-secondary);
+        color: rgba(255, 255, 255, 0.9);
         text-decoration: none;
         transition: color 0.3s ease;
         flex: 1;
@@ -1007,9 +1024,11 @@ select {
         max-height: 80vh !important;
         right: auto !important;
         z-index: 99999 !important;
-        background: #1e293b !important;
+        background: #ffffff !important;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        backdrop-filter: blur(100px) !important;
+        -webkit-backdrop-filter: blur(100px) !important;
         border-radius: 12px !important;
         display: flex;
         flex-direction: column;
@@ -1135,7 +1154,7 @@ select {
 
 /* Profile View */
 .profile-header {
-    background: var(--bg-card);
+    background: var(--card-glass);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 2rem;
@@ -1145,6 +1164,10 @@ select {
     flex-wrap: wrap;
     gap: 2rem;
     margin-top: 2rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-md);
+    color: var(--text-main);
 }
 
 .profile-info {
@@ -1188,25 +1211,28 @@ select {
 }
 
 .stat-card {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.5);
     padding: 1rem 1.5rem;
     border-radius: var(--radius-sm);
     text-align: center;
     min-width: 120px;
+    border: 1px solid var(--border-color);
 }
 
 .stat-card h3 {
     margin: 0;
     font-size: 1.5rem;
     color: var(--primary-color);
+    text-shadow: none;
 }
 
 .stat-card p {
     margin: 0.25rem 0 0;
     border-radius: 2rem;
     border: 1px solid var(--border-color);
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .chat-input-area button {
@@ -1256,14 +1282,14 @@ select {
     top: calc(100% + 10px);
     right: -10px;
     width: 380px;
-    background: rgba(15, 23, 42, 0.85);
-    border: 1px solid var(--border-color);
+    background: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-md);
-    box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
     z-index: 1000;
     overflow: hidden;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(100px);
+    -webkit-backdrop-filter: blur(100px);
     transform-origin: top right;
     animation: scaleIn 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
@@ -1288,7 +1314,7 @@ select {
 .btn-text {
     background: none;
     border: none;
-    color: var(--primary-color);
+    color: #1d4ed8;
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
@@ -1296,7 +1322,7 @@ select {
 }
 
 .btn-text:hover {
-    color: var(--primary-hover);
+    color: #1e40af;
     text-decoration: underline;
 }
 
@@ -1339,12 +1365,12 @@ select {
 }
 
 .notification-item.unread {
-    background: rgba(99, 102, 241, 0.08);
-    border-color: rgba(99, 102, 241, 0.2);
+    background: rgba(29, 78, 216, 0.08);
+    border-color: rgba(29, 78, 216, 0.2);
 }
 
 .notification-item.unread:hover {
-    background: rgba(99, 102, 241, 0.12);
+    background: rgba(29, 78, 216, 0.12);
 }
 
 .notif-icon {
@@ -1356,14 +1382,14 @@ select {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: var(--primary-color);
+    color: #1d4ed8;
     font-size: 1.2rem;
 }
 
 .notification-item.unread .notif-icon {
-    background: var(--primary-color);
+    background: #1d4ed8;
     color: white;
-    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3);
 }
 
 .notif-content {
@@ -1430,8 +1456,8 @@ select {
 }
 
 .notification-item.unread {
-    background: rgba(99, 102, 241, 0.05);
-    border-left: 3px solid var(--primary-color);
+    background: rgba(29, 78, 216, 0.05);
+    border-left: 3px solid #1d4ed8;
 }
 
 .notification-item p {
@@ -1558,7 +1584,7 @@ select {
 .chat-container {
     display: flex;
     height: calc(100vh - 100px);
-    background: var(--card-glass);
+    background: rgba(255, 255, 255, 0.15);
     border-radius: var(--radius-lg);
     overflow: hidden;
     border: 1px solid var(--border-color);
@@ -1573,7 +1599,7 @@ select {
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    background: rgba(15, 23, 42, 0.4);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .chat-sidebar h3 {
@@ -1669,7 +1695,7 @@ select {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    background: rgba(15, 23, 42, 0.2);
+    background: rgba(255, 255, 255, 0.05);
     position: relative;
 }
 
@@ -1764,51 +1790,67 @@ select {
 }
 
 .chat-input-area {
-    padding: 1.5rem;
-    border-top: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     gap: 1rem;
-    background: rgba(15, 23, 42, 0.6);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
     align-items: center;
+    position: relative;
+    z-index: 10;
 }
 
 .chat-input-area input {
     flex-grow: 1;
     padding: 1rem 1.5rem;
     border-radius: 30px;
-    border: 1px solid var(--border-color);
-    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
     color: var(--text-main);
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 1rem;
+    backdrop-filter: blur(5px);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.chat-input-area input::placeholder {
+    color: rgba(0, 0, 0, 0.4);
 }
 
 .chat-input-area input:focus {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.25);
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
 }
 
 .chat-input-area button {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: var(--primary-color);
+    background: var(--primary-gradient);
     color: white;
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
     font-size: 1.2rem;
-    box-shadow: 0 4px 10px var(--primary-glow);
 }
 
 .chat-input-area button:hover {
     transform: scale(1.1) rotate(-10deg);
-    background: var(--primary-hover);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.5);
 }
+
+.chat-input-area button:active {
+    transform: scale(0.95);
+}
+
+
 
 .btn-back-chat {
     display: none;
@@ -3208,4 +3250,38 @@ select {
         transform: scale(1);
         opacity: 1;
     }
+}
+
+/* Section Header */
+.section-header {
+    background: var(--card-glass);
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    margin: 2.5rem 0 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.section-header i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    background: var(--primary-glow);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
 }
