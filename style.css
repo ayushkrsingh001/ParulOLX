@@ -3361,3 +3361,94 @@ select {
     -webkit-text-fill-color: transparent;
     display: inline-block;
 }
+
+/* Chat Image Styling */
+.message.has-image {
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.message.has-image.sent {
+    align-items: flex-end;
+}
+
+.message.has-image.received {
+    align-items: flex-start;
+}
+
+.message img {
+    max-width: 250px;
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s;
+    object-fit: cover;
+    display: block;
+}
+
+.message img:hover {
+    transform: scale(1.02);
+}
+
+/* If text accompanies image, style it separately */
+.message.has-image span {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 12px;
+    border-top-right-radius: 2px;
+    max-width: 250px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.message.received.has-image span {
+    background: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    border-top-right-radius: 12px;
+    border-top-left-radius: 2px;
+}
+
+/* Chat Avatar Fix */
+.chat-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 0.75rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background: var(--bg-card);
+    flex-shrink: 0;
+}
+
+.chat-avatar.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+}
+
+.message-row {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.message-row.sent {
+    flex-direction: row-reverse;
+}
+
+.message-row.sent .chat-avatar {
+    margin-right: 0;
+    margin-left: 0.75rem;
+}

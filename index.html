@@ -279,7 +279,11 @@
                         </div>
                     </div>
                     <form id="chat-form" class="chat-input-area hidden">
-                        <input type="text" id="message-input" placeholder="Type a message..." required>
+                        <input type="file" id="chat-photo-input" accept="image/*" style="display: none;">
+                        <button type="button" id="btn-chat-photo" class="btn-icon"
+                            style="margin-right: 0.5rem; background: none; color: var(--text-secondary); box-shadow: none; border: none;"><i
+                                class="ri-image-add-line" style="font-size: 1.5rem;"></i></button>
+                        <input type="text" id="message-input" placeholder="Type a message...">
                         <button type="submit" class="btn-main"><i class="ri-send-plane-fill"></i></button>
                     </form>
                 </div>

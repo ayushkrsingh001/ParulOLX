@@ -507,6 +507,23 @@ function setupEventListeners() {
 
     // Chat
     safeAddEventListener('chat-form', 'submit', handleSendMessage);
+
+    // Chat Photo Upload
+    safeAddEventListener('btn-chat-photo', 'click', () => {
+        document.getElementById('chat-photo-input').click();
+    });
+
+    safeAddEventListener('chat-photo-input', 'change', (e) => {
+        const file = e.target.files[0];
+        const btn = document.getElementById('btn-chat-photo');
+        if (file) {
+            btn.innerHTML = '<i class="ri-checkbox-circle-fill" style="font-size: 1.5rem; color: var(--primary-color);"></i>'; // Indicate selection
+        } else {
+            btn.innerHTML = '<i class="ri-image-add-line" style="font-size: 1.5rem;"></i>';
+            btn.style.color = 'var(--text-secondary)';
+        }
+    });
+
     safeAddEventListener('chat-list', 'click', (e) => {
         // Handle Delete
         if (e.target.closest('.btn-delete-chat')) {
@@ -1036,14 +1053,41 @@ async function handleSendMessage(e) {
     if (!currentChatId || !currentUser) return;
 
     const input = document.getElementById('message-input');
+    const fileInput = document.getElementById('chat-photo-input');
     const text = input.value;
+    const file = fileInput.files[0];
+
+    if (!text && !file) return;
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalIcon = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i>';
 
     try {
-        await sendMessage(currentChatId, currentUser.uid, text);
+        let imageUrl = null;
+        if (file) {
+            imageUrl = await uploadImage(file);
+        }
+
+        await sendMessage(currentChatId, currentUser.uid, text, imageUrl);
+
         input.value = '';
-        // No need to manually refresh, listener will handle it
+        fileInput.value = ''; // Clear file input
+
+        // Reset button icon style if it was changed to indicate selection
+        const photoBtn = document.getElementById('btn-chat-photo');
+        if (photoBtn) {
+            photoBtn.innerHTML = '<i class="ri-image-add-line" style="font-size: 1.5rem;"></i>';
+            photoBtn.style.color = 'var(--text-secondary)';
+        }
+
     } catch (error) {
         console.error("Failed to send message", error);
+        alert("Failed to send message: " + error.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalIcon;
     }
 }
 

@@ -541,7 +541,25 @@ export function renderChatMessages(messages, currentUserId, partnerPhotoURL = nu
 
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${isSent ? 'sent' : 'received'}`;
-        msgDiv.textContent = msg.text;
+
+        if (msg.imageUrl) {
+            msgDiv.classList.add('has-image');
+            const msgImg = document.createElement('img');
+            msgImg.src = msg.imageUrl;
+            msgImg.style.maxWidth = '200px';
+            msgImg.style.borderRadius = '8px';
+            msgImg.style.marginBottom = msg.text ? '0.5rem' : '0';
+            msgImg.style.display = 'block';
+            msgImg.style.cursor = 'pointer';
+            msgImg.onclick = () => window.open(msg.imageUrl, '_blank');
+            msgDiv.appendChild(msgImg);
+        }
+
+        if (msg.text) {
+            const textSpan = document.createElement('span');
+            textSpan.textContent = msg.text;
+            msgDiv.appendChild(textSpan);
+        }
 
         row.appendChild(msgDiv);
         container.appendChild(row);

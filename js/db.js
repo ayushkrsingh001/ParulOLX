@@ -286,19 +286,32 @@ export async function getUserById(userId) {
     }
 }
 
-export async function sendMessage(chatId, senderId, text) {
+export async function sendMessage(chatId, senderId, text, imageUrl = null) {
     try {
-        // Add message to subcollection
-        await addDoc(collection(db, "chats", chatId, "messages"), {
+        const messageData = {
             senderId: senderId,
-            text: text,
+            text: text || '',
             timestamp: serverTimestamp()
-        });
+        };
+
+        if (imageUrl) {
+            messageData.imageUrl = imageUrl;
+        }
+
+        // Add message to subcollection
+        await addDoc(collection(db, "chats", chatId, "messages"), messageData);
 
         // Update chat summary
         const chatRef = doc(db, "chats", chatId);
+        let lastMessageText = text;
+        if (imageUrl && !text) {
+            lastMessageText = "Sent a photo";
+        } else if (imageUrl && text) {
+            lastMessageText = "Sent a photo: " + text;
+        }
+
         await updateDoc(chatRef, {
-            lastMessage: text,
+            lastMessage: lastMessageText,
             lastMessageTime: serverTimestamp()
         });
 
