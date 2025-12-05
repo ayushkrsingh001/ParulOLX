@@ -1,5 +1,5 @@
-const CLOUD_NAME = "dfshnr08w";
-const UPLOAD_PRESET = "CampusOlx";
+const CLOUD_NAME = "dnibuk426";
+const UPLOAD_PRESET = "ParulOLX";
 
 export async function uploadImage(file) {
     try {
