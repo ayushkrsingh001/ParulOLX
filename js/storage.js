@@ -1,5 +1,4 @@
-const CLOUD_NAME = "dnibuk426";
-const UPLOAD_PRESET = "ParulOLX";
+import config from './config.js';
 
 export async function uploadImage(file) {
     try {
@@ -7,9 +6,9 @@ export async function uploadImage(file) {
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', UPLOAD_PRESET);
+        formData.append('upload_preset', config.cloudinary.uploadPreset);
 
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${config.cloudinary.cloudName}/image/upload`, {
             method: 'POST',
             body: formData
         });
