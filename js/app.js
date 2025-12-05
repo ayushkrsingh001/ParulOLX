@@ -1,7 +1,6 @@
 import { signUp, login, logout, onUserStatusChanged, loginWithGoogle, sendPasswordReset } from './auth.js';
 import { createListing, getListings, getListingById, startChat, deleteListing, getUserListings, incrementListingViews, addComment, getComments, getUserChats, getChatMessages, sendMessage, subscribeToNotifications, markNotificationRead, markAllNotificationsRead, deleteChat, subscribeToChatMessages, getUserById, addReview, getReviews, deleteNotification, getChatById, deleteAllNotifications, updateUserProfile } from './db.js';
 import { uploadImage } from './storage.js';
-import config from './config.js';
 import { showView, renderListings, renderListingDetails, updateAuthUI, renderProfile, renderComments, renderChatList, renderChatMessages, renderNotifications, showChatWindow, showChatList, renderReviews } from './ui.js';
 
 let currentUser = null;
@@ -68,14 +67,6 @@ async function sendOTPEmail(email, name, otp) {
 document.addEventListener('DOMContentLoaded', () => {
     try {
         console.log("App initializing...");
-
-        // Initialize EmailJS
-        if (typeof emailjs !== 'undefined') {
-            emailjs.init(config.emailJs.publicKey);
-        } else {
-            console.warn("EmailJS library not loaded");
-        }
-
         setupEventListeners();
         console.log("Event listeners set up.");
 
