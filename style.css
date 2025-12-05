@@ -2677,9 +2677,7 @@ select {
         /* Center logo on mobile */
     }
 
-    /* Hide default auth links if not handled by desktop-only */
-    #auth-links,
-    #user-links {}
+
 
     .dist-star {
         min-width: 35px;
