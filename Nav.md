@@ -19,35 +19,35 @@ Below is a detailed list of all features implemented in the project:
 
 1.  **User Authentication**
     *   **Description:** Allows students to sign up using university emails or Gmail, verify their identity via OTP, and log in securely. Includes Google Sign-In and Password Reset.
-    *   **Code Location:** `js/auth.js` (Auth logic), `js/app.js` (Form handling & OTP).
+    *   **Code Location:** `js/auth.js` (`signUp`: L20, `login`: L52), `js/app.js` (`handleSignup`: L720, `sendOTPEmail`: L13).
 
 2.  **Product Listing Management**
     *   **Description:** Students can create new listings with photos, titles, prices, and categories. They can also view and delete their own active listings.
-    *   **Code Location:** `js/db.js` (`createListing`, `deleteListing`), `js/ui.js` (Rendering logic).
+    *   **Code Location:** `js/db.js` (`createListing`: L20, `deleteListing`: L401), `js/ui.js` (`renderListings`: L21).
 
 3.  **Search and Filtering**
     *   **Description:** Users can search for items by keywords and filter listings by categories (Books, Electronics, Furniture, etc.).
-    *   **Code Location:** `js/db.js` (`getListings`), `js/app.js` (Event listeners).
+    *   **Code Location:** `js/db.js` (`getListings`: L37), `js/app.js` (Event Listeners: L243).
 
 4.  **Real-Time Chat System**
     *   **Description:** Facilitates instant communication between buyers and sellers without sharing personal phone numbers. Supports image sharing in chat.
-    *   **Code Location:** `js/db.js` (Chat data operations), `js/ui.js` (Chat UI rendering).
+    *   **Code Location:** `js/db.js` (`startChat`: L226, `sendMessage`: L289), `js/ui.js` (Chat Rendering: L459-L570).
 
 5.  **User Profiles**
     *   **Description:** Displays user information (verification status, course details) and their active listings. Users can edit their profile details.
-    *   **Code Location:** `js/ui.js` (`renderProfile`), `js/app.js` (`loadUserProfile`).
+    *   **Code Location:** `js/ui.js` (`renderProfile`: L302), `js/app.js` (`loadUserProfile`: L684).
 
 6.  **Notifications**
     *   **Description:** Real-time alerts for new messages, connection requests, or system updates.
-    *   **Code Location:** `js/db.js` (`subscribeToNotifications`), `js/ui.js` (`renderNotifications`).
+    *   **Code Location:** `js/db.js` (`subscribeToNotifications`: L163), `js/ui.js` (`renderNotifications`: L572).
 
 7.  **Reviews and Ratings**
     *   **Description:** Buyers can rate sellers and leave reviews to build community trust.
-    *   **Code Location:** `js/db.js` (`addReview`, `getReviews`), `js/ui.js` (`renderReviews`).
+    *   **Code Location:** `js/db.js` (`addReview`: L423, `getReviews`: L453), `js/ui.js` (`renderReviews`: L670).
 
 8.  **Comments / Q&A**
     *   **Description:** Public discussion section on listing pages for asking common questions.
-    *   **Code Location:** `js/db.js` (`addComment`), `js/ui.js` (`renderComments`).
+    *   **Code Location:** `js/db.js` (`addComment`: L128), `js/ui.js` (`renderComments`: L436).
 
 ---
 
@@ -81,19 +81,19 @@ The project is organized into clear directories to separate concerns:
 
 ## 4. Feature-to-Code Mapping Table
 
-| Feature | Description | File Location | Important Code Functions |
+| Feature | Description | File Location | Important Code Functions (Line No.) |
 |---------|-------------|---------------|---------------------------|
-| **Sign Up & OTP** | Register new user & verify email | `js/app.js`, `js/auth.js` | `handleSignup`, `sendOTPEmail`, `signUp` |
-| **Login** | User authentication | `js/auth.js` | `login`, `loginWithGoogle` |
-| **Create Listing** | Form to add new item | `js/db.js`, `js/storage.js` | `createListing`, `uploadImage` |
-| **View Home/Feed** | Main page with product grid | `js/db.js`, `js/ui.js` | `getListings`, `renderListings` |
-| **Search/Filter** | Filter items by cat/text | `js/db.js` | `getListings` (with filters) |
-| **Item Details** | Full view of a product | `js/ui.js`, `js/db.js` | `loadListingDetails`, `getListingById` |
-| **Chat** | Messaging system | `js/db.js` | `startChat`, `sendMessage`, `subscribeToChatMessages` |
-| **Profile** | User details & items | `js/ui.js`, `js/db.js` | `renderProfile`, `getUserListings` |
-| **Edit Profile** | Update user info/photo | `js/app.js`, `js/db.js` | `updateUserProfile` |
-| **Reviews** | Rating system | `js/db.js` | `addReview`, `getReviews` |
-| **Notifications** | Alerts for actions | `js/db.js` | `subscribeToNotifications` |
+| **Sign Up & OTP** | Register new user & verify email | `js/app.js`, `js/auth.js` | `handleSignup` (app.js:720), `sendOTPEmail` (app.js:13), `signUp` (auth.js:20) |
+| **Login** | User authentication | `js/auth.js` | `login` (auth.js:52), `loginWithGoogle` (auth.js:63) |
+| **Create Listing** | Form to add new item | `js/db.js`, `js/storage.js` | `createListing` (db.js:20), `uploadImage` (storage.js:4) |
+| **View Home/Feed** | Main page with product grid | `js/db.js`, `js/ui.js` | `getListings` (db.js:37), `renderListings` (ui.js:21) |
+| **Search/Filter** | Filter items by cat/text | `js/db.js` | `getListings` (db.js:37) |
+| **Item Details** | Full view of a product | `js/ui.js`, `js/db.js` | `loadListingDetails` (app.js:659), `getListingById` (db.js:96) |
+| **Chat** | Messaging system | `js/db.js` | `startChat` (db.js:226), `sendMessage` (db.js:289), `subscribeToChatMessages` (db.js:388) |
+| **Profile** | User details & items | `js/ui.js`, `js/db.js` | `renderProfile` (ui.js:302), `getUserListings` (db.js:78) |
+| **Edit Profile** | Update user info/photo | `js/app.js`, `js/db.js` | `updateUserProfile` (db.js:264) |
+| **Reviews** | Rating system | `js/db.js` | `addReview` (db.js:423), `getReviews` (db.js:453) |
+| **Notifications** | Alerts for actions | `js/db.js` | `subscribeToNotifications` (db.js:163) |
 
 ---
 
